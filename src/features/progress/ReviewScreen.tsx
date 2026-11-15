@@ -18,7 +18,7 @@ export function ReviewScreen() {
     <Header title="Review mistakes" back />
     <Surface>
       <AppText variant="heading">{profile.review.length} questions to review</AppText>
-      <AppText tone="muted">Practice previously missed questions at your own pace. Due questions return first.</AppText>
+      <AppText tone="muted">Due questions return first. Early practice does not clear a scheduled review.</AppText>
       <Button label="Start review" arrow disabled={!ready || error || !items.length} onPress={() => router.push({ pathname: '/session', params: { ...sessionParams('mixed', 1), review: '1' } })} />
     </Surface>
     {items.map(item => <Surface key={item.question.key}>

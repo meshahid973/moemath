@@ -9,6 +9,7 @@ import { Screen } from '@/components/ui/Screen';
 import type { SessionOptions } from '@/engine/arithmetic/questions';
 import { adaptiveQuestions } from '@/engine/adaptive/plan';
 import { useAdaptive } from '@/features/adaptive/AdaptiveProvider';
+import { localDay } from '@/engine/progress/metrics';
 import { createSeed } from '@/engine/session/options';
 import { createSession, sessionReducer } from '@/engine/session/session';
 import { spacing } from '@/theme/tokens';
@@ -31,8 +32,8 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
   useEffect(() => {
     if (state.phase !== 'completed' || recorded.current === state.attempts) return;
     recorded.current = state.attempts;
-    record(state.id ?? (Date.now() + ':' + createSeed()), state.attempts);
-  }, [state.phase, state.attempts, state.id, record]);
+    record(state.id ?? (Date.now() + ':' + createSeed()), state.attempts, state.completedAt ?? Date.now(), state.completedDay);
+  }, [state.phase, state.attempts, state.id, state.completedAt, state.completedDay, record]);
   const index = state.attempts.length;
   const question = state.questions[index];
   const total = state.questions.length;
@@ -80,7 +81,7 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       if (state.phase === 'completed') {
-        leave();
+        if (!pending) leave();
       } else if (state.phase === 'paused') {
         confirmExit();
       } else {
@@ -89,11 +90,14 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
       return true;
     });
     return () => subscription.remove();
-  }, [state.phase, confirmExit, leave, pause]);
+  }, [state.phase, confirmExit, leave, pause, pending]);
 
   const generation = state.generation;
   const onKey = useCallback((key: Key) => {
-    if (key === 'submit') dispatch({ type: 'submit', index, generation, now: performance.now() });
+    if (key === 'submit') {
+      const wallTime = Date.now();
+      dispatch({ type: 'submit', index, generation, now: performance.now(), wallTime, day: localDay(wallTime) });
+    }
     else if (key === 'delete') dispatch({ type: 'backspace', index, generation });
     else dispatch({ type: 'digit', digit: key, index, generation });
   }, [index, generation]);

@@ -38,6 +38,7 @@ export async function exportPracticeData() {
     throw error;
   }
   handle.close();
+  // Keep one cache file: recipients may read the shared URI after the share sheet returns.
   await Sharing.shareAsync(file.uri, { mimeType: 'application/json', UTI: 'public.json', dialogTitle: 'Export MoeMath data' });
 }
 

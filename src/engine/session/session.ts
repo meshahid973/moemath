@@ -10,6 +10,8 @@ export type SessionAttempt = Attempt & Readonly<{
 export type Session = Readonly<{
   id?: string;
   generation: number;
+  completedAt?: number;
+  completedDay?: string;
   phase: 'ready' | 'active' | 'paused' | 'completed';
   questions: readonly Question[];
   attempts: readonly SessionAttempt[];
@@ -24,7 +26,7 @@ export type SessionAction =
   | { type: 'start' | 'pause' | 'resume'; now: number }
   | { type: 'digit'; digit: string; index: number; generation?: number }
   | { type: 'backspace'; index: number; generation?: number }
-  | { type: 'submit'; index: number; generation?: number; now: number }
+  | { type: 'submit'; index: number; generation?: number; now: number; wallTime?: number; day?: string }
   | { type: 'restart'; options: SessionOptions; now: number };
 
 const MAX_INPUT_LENGTH = 5;
@@ -99,6 +101,8 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
     ...state,
     attempts,
     phase: completed ? 'completed' : 'active',
+    completedAt: completed ? action.wallTime : undefined,
+    completedDay: completed ? action.day : undefined,
     input: '',
     elapsedBefore: completed ? elapsed : state.elapsedBefore,
     activeSince: completed ? null : state.activeSince,

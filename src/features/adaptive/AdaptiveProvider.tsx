@@ -6,7 +6,7 @@ import { loadProfile, saveCompleted } from '@/database/adaptive';
 
 type Snapshot = { profile: Profile; ready: boolean; error: boolean; pending: boolean };
 type Adaptive = Snapshot & {
-  record: (id: string, attempts: readonly SessionAttempt[]) => void;
+  record: (id: string, attempts: readonly SessionAttempt[], now: number, day?: string) => void;
   retrySave: () => void;
   reset: () => Promise<void>;
 };
@@ -15,7 +15,7 @@ const Availability = createContext(false);
 
 export function AdaptiveProvider({ children }: PropsWithChildren) {
   const [snapshot, setSnapshot] = useState<Snapshot>(() => ({ profile: emptyProfile(), ready: false, error: false, pending: true }));
-  const queue = useRef(new Map<string, { attempts: readonly SessionAttempt[]; now: number }>());
+  const queue = useRef(new Map<string, { attempts: readonly SessionAttempt[]; now: number; day?: string }>());
   const running = useRef(false);
   const initialized = useRef(false);
 
@@ -31,7 +31,7 @@ export function AdaptiveProvider({ children }: PropsWithChildren) {
         initialized.current = true;
       }
       for (const [id, item] of queue.current) {
-        latest = await saveCompleted(id, item.attempts, item.now);
+        latest = await saveCompleted(id, item.attempts, item.now, item.day);
         initialized.current = true;
         queue.current.delete(id);
       }
@@ -59,8 +59,8 @@ export function AdaptiveProvider({ children }: PropsWithChildren) {
     setSnapshot(previous => previous.pending ? previous : { ...previous, pending: true });
     void flush();
   }, [flush]);
-  const record = useCallback((id: string, attempts: readonly SessionAttempt[]) => {
-    if (!queue.current.has(id)) queue.current.set(id, { attempts, now: Date.now() });
+  const record = useCallback((id: string, attempts: readonly SessionAttempt[], now: number, day?: string) => {
+    if (!queue.current.has(id)) queue.current.set(id, { attempts, now, day });
     startFlush();
   }, [startFlush]);
 

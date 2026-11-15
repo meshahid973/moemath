@@ -63,9 +63,9 @@ export const ProgressChart = memo(function ProgressChart({ rows, metric }: { row
         <Svg width="100%" height={HEIGHT} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none">
           {[0, 0.5, 1].map(t => <Line key={t} x1={0} x2={WIDTH} y1={y(max * t)} y2={y(max * t)} stroke={colors.border} strokeDasharray="3 4" />)}
           {metric === 'activity' ? values.map((v, i) => {
-            const h = Math.max(2, BOTTOM - y(v ?? 0));
+            const h = BOTTOM - y(v ?? 0);
             const w = Math.min(slot * 0.68, 28);
-            return <Rect key={rows[i]!.day} x={x(i) - w / 2} y={BOTTOM - h} width={w} height={h} rx={Math.min(4, w / 2)} fill={i === index ? colors.primary : colors.primary + '66'} />;
+            return h === 0 ? null : <Rect key={rows[i]!.day} x={x(i) - w / 2} y={BOTTOM - h} width={w} height={h} rx={Math.min(4, w / 2)} fill={i === index ? colors.primary : colors.primary + '66'} />;
           }) : <>
             <Line x1={x(index)} x2={x(index)} y1={TOP} y2={BOTTOM} stroke={colors.muted} strokeDasharray="3 4" />
             <Path d={path || 'M0 0'} stroke={colors.primary} strokeWidth={2.2} fill="none" strokeLinejoin="round" strokeLinecap="round" />

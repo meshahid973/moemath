@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { AppState, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { Header } from '@/components/ui/Header';
@@ -29,10 +29,21 @@ export function ProgressScreen() {
   const [retry, setRetry] = useState(0);
   useFocusEffect(useCallback(() => {
     let active = true;
-    void dailyTotals(period).then(rows => {
-      if (active) { setData({ period, revision, retry, rows }); setError(false); }
-    }, () => { if (active) setError(true); });
-    return () => { active = false; };
+    let request = 0;
+    let timer: ReturnType<typeof setTimeout>;
+    const refresh = () => {
+      const current = ++request;
+      void dailyTotals(period).then(rows => {
+        if (active && current === request) { setData({ period, revision, retry, rows }); setError(false); }
+      }, () => { if (active && current === request) setError(true); });
+      clearTimeout(timer);
+      const midnight = new Date();
+      midnight.setHours(24, 0, 0, 0);
+      timer = setTimeout(refresh, Math.max(1000, midnight.getTime() - Date.now()));
+    };
+    refresh();
+    const sub = AppState.addEventListener('change', state => { if (state === 'active') refresh(); });
+    return () => { active = false; clearTimeout(timer); sub.remove(); };
   }, [period, retry, revision]));
   const rows = data?.period === period && data.revision === revision && data.retry === retry ? data.rows : undefined;
   const totals = rows ? aggregate(rows) : null;
