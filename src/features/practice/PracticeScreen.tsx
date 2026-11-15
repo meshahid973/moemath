@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui/Button';
 import { sessionParams } from '@/engine/session/options';
 import { View, StyleSheet } from 'react-native';
-import { AppText } from '@/components/ui/AppText';
+import { SectionTitle } from '@/components/ui/SectionTitle';
 import { Header } from '@/components/ui/Header';
 import { Screen } from '@/components/ui/Screen';
 import { spacing } from '@/theme/tokens';
@@ -20,14 +20,14 @@ export function PracticeScreen() {
     <Screen>
       <Header title="Practice" />
       <View style={styles.group}>
-        <AppText variant="heading" accessibilityRole="header">Operation</AppText>
+        <SectionTitle title="Operation" />
         <OperationPicker value={operation} onChange={setOperation} />
       </View>
       <View style={styles.group}>
-        <AppText variant="heading" accessibilityRole="header">Difficulty</AppText>
+        <SectionTitle title="Difficulty" />
         <DifficultyPicker value={difficulty} onChange={setDifficulty} />
       </View>
-      <Button label="Start practice" onPress={() => router.navigate({ pathname: '/session', params: sessionParams(operation, difficulty) })} />
+      <Button label="Start practice" arrow onPress={() => router.navigate({ pathname: '/session', params: sessionParams(operation, difficulty) })} />
     </Screen>
   );
 }

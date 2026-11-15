@@ -22,8 +22,10 @@ export function DifficultyPicker({ value, onChange }: Props) {
             style={({ pressed }) => [styles.option, {
               backgroundColor: selected ? colors.primary : pressed ? colors.tint : colors.surface,
               borderColor: selected ? colors.primary : colors.border,
+              transform: [{ scale: pressed ? 0.98 : 1 }],
             }]}
           >
+            <AppText variant="caption" tone={selected ? 'onPrimary' : 'muted'} style={{ fontVariant: ['tabular-nums'] }}>0{level}</AppText>
             <AppText tone={selected ? 'onPrimary' : 'text'} variant="label">{difficultyNames[level]}</AppText>
           </Pressable>
         );
@@ -34,5 +36,5 @@ export function DifficultyPicker({ value, onChange }: Props) {
 
 const styles = StyleSheet.create({
   group: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  option: { flexBasis: '30%', flexGrow: 1, minWidth: 92, minHeight: size.touch, borderRadius: radius.control, borderWidth: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.sm },
+  option: { flexBasis: '30%', flexGrow: 1, minWidth: 92, minHeight: size.button, borderRadius: radius.control, borderWidth: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.sm },
 });

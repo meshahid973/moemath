@@ -18,7 +18,7 @@ export const CompanionPortrait = memo(function CompanionPortrait({ expression, s
       source={source}
       style={{ width: size, height: size }}
       contentFit="contain"
-      transition={reducedMotion ? 0 : 120}
+      transition={reducedMotion ? 0 : 150}
       accessible={false}
       accessibilityElementsHidden
       importantForAccessibility="no"

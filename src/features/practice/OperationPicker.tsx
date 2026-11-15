@@ -1,16 +1,9 @@
 import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
-import { symbols, type PracticeOperation } from '@/engine/arithmetic/types';
+import type { PracticeOperation } from '@/engine/arithmetic/types';
 import { useTheme } from '@/theme/provider';
 import { radius, spacing } from '@/theme/tokens';
-
-const choices = [
-  { value: 'mixed', label: 'Mixed', mark: '±', color: '#A48AD5' },
-  { value: 'addition', label: 'Addition', mark: symbols.addition, color: '#56BEB2' },
-  { value: 'subtraction', label: 'Subtraction', mark: symbols.subtraction, color: '#DF9DB6' },
-  { value: 'multiplication', label: 'Multiplication', mark: symbols.multiplication, color: '#A48AD5' },
-  { value: 'division', label: 'Division', mark: symbols.division, color: '#82B6DC' },
-] as const;
+import { operationChoices, operationColors } from './operationAppearance';
 
 type Props = { value: PracticeOperation; onChange: (value: PracticeOperation) => void };
 
@@ -23,35 +16,39 @@ export function OperationPicker(props: Props) {
 }
 
 function OperationGrid({ value, onChange }: { value?: PracticeOperation; onChange: Props['onChange'] }) {
-  const { colors } = useTheme();
+  const { colors, scheme } = useTheme();
   const { width, fontScale } = useWindowDimensions();
   const singleColumn = width < 350 || fontScale > 1.3;
+  const quick = value === undefined;
 
   return (
-    <View style={styles.grid} accessibilityRole={value === undefined ? undefined : 'radiogroup'}>
-      {choices.filter((choice) => value !== undefined || choice.value !== 'mixed').map((choice) => {
+    <View style={styles.grid} accessibilityRole={quick ? undefined : 'radiogroup'}>
+      {operationChoices.filter((choice) => !quick || choice.value !== 'mixed').map((choice) => {
         const selected = choice.value === value;
+        const accent = operationColors[scheme][choice.value];
         return (
           <View key={choice.value} style={choice.value === 'mixed' || singleColumn ? styles.full : styles.half}>
             <Pressable
-              accessibilityRole={value === undefined ? 'button' : 'radio'}
+              accessibilityRole={quick ? 'button' : 'radio'}
               accessibilityLabel={choice.label}
-              accessibilityState={value === undefined ? undefined : { checked: selected }}
+              accessibilityState={quick ? undefined : { checked: selected }}
               onPress={() => onChange(choice.value)}
               style={({ pressed }) => [
-                styles.tile,
+                styles.tile, quick && styles.quickTile,
                 {
-                  borderColor: selected ? colors.primary : colors.border,
+                  borderColor: selected ? accent : colors.border,
                   backgroundColor: selected || pressed ? colors.tint : colors.surface,
+                  transform: [{ scale: pressed ? 0.98 : 1 }],
                 },
               ]}
             >
-              <View style={[styles.rail, { backgroundColor: choice.color }]} />
-              <AppText accessibilityElementsHidden importantForAccessibility="no" style={styles.mark}>{choice.mark}</AppText>
+              <View pointerEvents="none" style={[styles.corner, { backgroundColor: accent + '12' }]} />
+              <AppText accessibilityElementsHidden importantForAccessibility="no" style={[styles.mark, { color: accent }]}>{choice.mark}</AppText>
               <AppText variant="label" style={styles.name}>{choice.label}</AppText>
-              {value !== undefined && <View style={[styles.selection, { borderColor: selected ? colors.primary : colors.muted }]}>
-                {selected && <View style={[styles.dot, { backgroundColor: colors.primary }]} />}
+              {!quick && <View style={[styles.selection, { borderColor: selected ? accent : colors.muted }]}>
+                {selected && <View style={[styles.dot, { backgroundColor: accent }]} />}
               </View>}
+              {quick && <View style={[styles.rail, { backgroundColor: accent }]} />}
             </Pressable>
           </View>
         );
@@ -64,10 +61,12 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', margin: -spacing.xs },
   full: { width: '100%', padding: spacing.xs },
   half: { width: '50%', padding: spacing.xs },
-  tile: { minHeight: 68, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, paddingLeft: spacing.lg, borderWidth: 1, borderRadius: radius.control, overflow: 'hidden' },
-  rail: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 4 },
-  mark: { fontSize: 24, lineHeight: 31, fontVariant: ['tabular-nums'] },
-  name: { flex: 1, fontSize: 14 },
-  selection: { width: 16, height: 16, borderWidth: 1.5, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  tile: { minHeight: 68, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, borderWidth: 1, borderRadius: radius.control, overflow: 'hidden' },
+  quickTile: { minHeight: 102, alignItems: 'flex-start', flexDirection: 'column', gap: spacing.xs },
+  corner: { position: 'absolute', width: 90, height: 90, right: -35, top: -44, transform: [{ rotate: '45deg' }] },
+  rail: { width: 24, height: 3, borderRadius: 2, marginTop: spacing.xs },
+  mark: { fontSize: 30, lineHeight: 36, fontVariant: ['tabular-nums'] },
+  name: { flexShrink: 1, fontSize: 14 },
+  selection: { marginLeft: 'auto', width: 16, height: 16, borderWidth: 1.5, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   dot: { width: 8, height: 8, borderRadius: 4 },
 });

@@ -15,6 +15,7 @@ import { QuestionStage } from './QuestionStage';
 import { SessionProgress } from './SessionProgress';
 import { SessionResults } from './SessionResults';
 import { CompanionPortrait, hasCompanion } from '@/features/companion/CompanionPortrait';
+import { CompanionDialogue } from '@/features/companion/CompanionDialogue';
 import { useCompanionSettings } from '@/features/companion/CompanionSettings';
 import { useAnswerHaptics } from './useAnswerHaptics';
 import { SessionTimer } from './SessionTimer';
@@ -100,6 +101,7 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
         <View style={styles.paused}>
           {showCompanion && hasCompanion && <CompanionPortrait expression="sleepy" size={108} />}
           <AppText variant="title">Paused</AppText>
+          {showCompanion && <CompanionDialogue message="Take your time." />}
           <SessionTimer activeSince={null} elapsedBefore={state.elapsedBefore} />
         </View>
         <Button label="Resume" onPress={resume} />
