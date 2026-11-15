@@ -10,15 +10,16 @@ import { spacing } from '@/theme/tokens';
 export const SessionCompanion = memo(function SessionCompanion({ previous }: { previous?: SessionAttempt }) {
   const { showCompanion } = useCompanionSettings();
   const { height, width, fontScale } = useWindowDimensions();
+  const visible = showCompanion && height >= 740 && width >= 350 && fontScale <= 1.2;
   const [settled, setSettled] = useState<SessionAttempt>();
 
   useEffect(() => {
-    if (!previous) return;
+    if (!previous || !visible) return;
     const timeout = setTimeout(() => setSettled(previous), 900);
     return () => clearTimeout(timeout);
-  }, [previous]);
+  }, [previous, visible]);
 
-  if (!showCompanion || height < 740 || width < 350 || fontScale > 1.2) return null;
+  if (!visible) return null;
   const reacting = previous && previous !== settled;
   const correct = previous?.expected === previous?.submitted;
   const expression = reacting ? answerExpression(correct) : 'thinking';

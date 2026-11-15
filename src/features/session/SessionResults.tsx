@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react-native';
@@ -7,6 +8,7 @@ import { IconButton } from '@/components/ui/IconButton';
 import { PanelMotif } from '@/components/ui/PanelMotif';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { Surface } from '@/components/ui/Surface';
+import { SaveStatus } from '@/features/adaptive/SaveStatus';
 import { summarizeAttempts } from '@/engine/scoring';
 import type { SessionAttempt } from '@/engine/session/session';
 import { useTheme } from '@/theme/provider';
@@ -15,17 +17,17 @@ import { CompanionPortrait } from '@/features/companion/CompanionPortrait';
 import { useCompanionSettings } from '@/features/companion/CompanionSettings';
 import { resultExpression } from '@/features/companion/expressions';
 import { formatEquation } from '@/engine/arithmetic/format';
-import { formatTime } from './SessionTimer';
+import { formatTime } from '@/engine/session/clock';
 
 const enter = FadeInDown.duration(220).reduceMotion(ReduceMotion.System);
-type Props = { attempts: readonly SessionAttempt[]; onRetry: () => void; onDone: () => void };
+type Props = { attempts: readonly SessionAttempt[]; onRetry: () => void; onDone: () => void; saving: boolean };
 
-export function SessionResults({ attempts, onRetry, onDone }: Props) {
+export const SessionResults = memo(function SessionResults({ attempts, onRetry, onDone, saving }: Props) {
   const { colors } = useTheme();
   const { showCompanion } = useCompanionSettings();
   const { width, fontScale } = useWindowDimensions();
-  const score = summarizeAttempts(attempts);
-  const mistakes = attempts.filter((attempt) => attempt.expected !== attempt.submitted);
+  const score = useMemo(() => summarizeAttempts(attempts), [attempts]);
+  const mistakes = useMemo(() => attempts.filter((attempt) => attempt.expected !== attempt.submitted), [attempts]);
   const perfect = mistakes.length === 0;
   const horizontal = width >= 360 && fontScale <= 1.2;
 
@@ -77,11 +79,12 @@ export function SessionResults({ attempts, onRetry, onDone }: Props) {
           </Surface>
         </View>
       )}
-      <Button label="Practice again" arrow onPress={onRetry} />
+      <SaveStatus />
+      <Button label="Practice again" arrow onPress={onRetry} disabled={saving} />
       <Button label="Done" variant="secondary" onPress={onDone} />
     </>
   );
-}
+});
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (

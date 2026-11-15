@@ -10,6 +10,9 @@ export type SessionOptions = Readonly<{
   difficulty: Difficulty;
   count?: number;
   seed?: number;
+  adaptive?: boolean;
+  id?: string;
+  planned?: readonly Question[];
 }>;
 
 function makeQuestion(operation: Operation, difficulty: Difficulty, a: number, b: number): Question {
@@ -40,7 +43,7 @@ function makeQuestion(operation: Operation, difficulty: Difficulty, a: number, b
   return { operation, difficulty, left, right, answer, key: operation + ':' + first + ':' + second };
 }
 
-function uniqueQuestion(operation: Operation, difficulty: Difficulty, random: Random, seen: Set<string>): Question {
+export function uniqueQuestion(operation: Operation, difficulty: Difficulty, random: Random, seen: Set<string>): Question {
   const [[minA, maxA], [minB, maxB]] = getRanges(operation, difficulty);
   for (let attempt = 0; attempt < 24; attempt++) {
     const question = makeQuestion(operation, difficulty, randomInt(random, minA, maxA), randomInt(random, minB, maxB));
