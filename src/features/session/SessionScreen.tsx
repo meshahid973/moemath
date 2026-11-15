@@ -17,6 +17,7 @@ import { SessionResults } from './SessionResults';
 import { CompanionPortrait, hasCompanion } from '@/features/companion/CompanionPortrait';
 import { CompanionDialogue } from '@/features/companion/CompanionDialogue';
 import { useCompanionSettings } from '@/features/companion/CompanionSettings';
+import { AnswerSounds } from './AnswerSounds';
 import { useAnswerHaptics } from './useAnswerHaptics';
 import { SessionTimer } from './SessionTimer';
 
@@ -26,7 +27,7 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
   const index = state.attempts.length;
   const question = state.questions[index];
   const total = state.questions.length;
-  const { showCompanion } = useCompanionSettings();
+  const { showCompanion, soundEffects } = useCompanionSettings();
   const previous = state.attempts[index - 1];
   useAnswerHaptics(previous);
 
@@ -85,13 +86,15 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
     else dispatch({ type: 'digit', digit: key, index });
   }, [index]);
 
+  const audio = soundEffects && <AnswerSounds attempt={previous} paused={state.phase === 'paused'} />;
+
   if (state.phase === 'completed') {
-    return <Screen full><SessionResults attempts={state.attempts} onRetry={retry} onDone={leave} /></Screen>;
+    return <>{audio}<Screen full><SessionResults attempts={state.attempts} onRetry={retry} onDone={leave} /></Screen></>;
   }
 
   if (state.phase === 'paused') {
     return (
-      <Screen full fill compact>
+      <>{audio}<Screen full fill compact>
         <View style={styles.header}>
           <IconButton icon={X} label="End practice" onPress={confirmExit} />
           <AppText variant="label">{index + 1} / {total}</AppText>
@@ -110,14 +113,14 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
           { text: 'Restart', onPress: retry },
         ])} />
         <Button label="End practice" variant="secondary" onPress={confirmExit} />
-      </Screen>
+      </Screen></>
     );
   }
 
   if (!question) return null;
 
   return (
-    <Screen full fill compact>
+    <>{audio}<Screen full fill compact>
       <View style={styles.header}>
         <IconButton icon={X} label="End practice" onPress={confirmExit} />
         <AppText variant="label" style={styles.counter}>{index + 1} / {total}</AppText>
@@ -129,7 +132,7 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
       </View>
       <QuestionStage question={question} input={state.input} previous={previous} />
       <Keypad onKey={onKey} canSubmit={state.phase === 'active' && state.input.length > 0} />
-    </Screen>
+    </Screen></>
   );
 }
 

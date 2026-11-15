@@ -1,6 +1,6 @@
 import { memo, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, ReduceMotion, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
+import Animated, { cancelAnimation, FadeIn, ReduceMotion, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 import { CheckCircle2, XCircle } from 'lucide-react-native';
 import { AppText } from '@/components/ui/AppText';
 import { symbols } from '@/engine/arithmetic/types';
@@ -26,6 +26,7 @@ export const AnswerFeedback = memo(function AnswerFeedback({ attempt }: { attemp
       withTiming(-2, { duration: 40 }),
       withTiming(0, { duration: 40 }),
     ));
+    return () => cancelAnimation(offset);
   }, [attempt, offset]);
 
   const correct = attempt?.expected === attempt?.submitted;

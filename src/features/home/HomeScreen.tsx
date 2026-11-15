@@ -29,7 +29,7 @@ export function HomeScreen() {
         <View style={[styles.hero, horizontal && styles.horizontal]}>
           <View style={styles.copy}>
             <AppText tone="primary" variant="caption" style={styles.eyebrow}>DAILY PRACTICE</AppText>
-            <AppText variant="heading" style={styles.title}>{showCompanion ? 'Ready to practice?' : 'Daily practice'}</AppText>
+            <AppText variant="heading" style={styles.title}>{showCompanion ? 'Ready to practice?' : 'Start your session'}</AppText>
             <AppText tone="muted">10 questions</AppText>
           </View>
           {showCompanion && <View pointerEvents="none" style={styles.portrait}>

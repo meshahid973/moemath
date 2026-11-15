@@ -47,7 +47,7 @@ export function SessionResults({ attempts, onRetry, onDone }: Props) {
             {showCompanion && <CompanionPortrait expression={resultExpression(score.correct, score.total)} size={horizontal ? 148 : 128} />}
           </View>
           <View accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: score.total, now: score.correct }} style={[styles.bar, { backgroundColor: colors.border }]}>
-            <View style={[styles.fill, { width: Math.round(score.accuracy * 100) + '%', backgroundColor: colors.primary }]} />
+            <View style={[styles.fill, { width: (Math.round(score.accuracy * 100) + '%') as `${number}%`, backgroundColor: colors.primary }]} />
           </View>
           <View style={styles.metrics}>
             <Metric label="Accuracy" value={Math.round(score.accuracy * 100) + '%'} />

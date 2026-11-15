@@ -17,7 +17,7 @@ const modes: { value: ThemeMode; label: string }[] = [
 
 export function SettingsScreen() {
   const { mode, setMode } = useTheme();
-  const { showCompanion, setShowCompanion, haptics, setHaptics } = useCompanionSettings();
+  const { showCompanion, setShowCompanion, haptics, setHaptics, soundEffects, setSoundEffects } = useCompanionSettings();
   return (
     <Screen full>
       <Header title="Settings" back />
@@ -29,6 +29,7 @@ export function SettingsScreen() {
         <SectionTitle title="Practice" />
         {hasCompanion && <SwitchRow label="Show Suu-chan" value={showCompanion} onChange={setShowCompanion} />}
         <SwitchRow label="Haptic feedback" value={haptics} onChange={setHaptics} />
+        <SwitchRow label="Sound effects" value={soundEffects} onChange={setSoundEffects} />
       </View>
     </Screen>
   );
