@@ -13,6 +13,8 @@ export const palettes = {
     text: '#302638',
     muted: '#695E74',
     border: '#DCD3E5',
+    success: '#16715F',
+    danger: '#A63760',
   },
   dark: {
     background: '#000000',
@@ -24,6 +26,8 @@ export const palettes = {
     text: '#F2EDF7',
     muted: '#AAA2B3',
     border: '#38323F',
+    success: '#83D4C2',
+    danger: '#F3A3BD',
   },
 } as const;
 

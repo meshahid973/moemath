@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
+import { Button } from '@/components/ui/Button';
+import { sessionParams } from '@/engine/session/options';
 import { View, StyleSheet } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { Header } from '@/components/ui/Header';
@@ -9,6 +12,7 @@ import { DifficultyPicker } from './DifficultyPicker';
 import { OperationPicker } from './OperationPicker';
 
 export function PracticeScreen() {
+  const router = useRouter();
   const [operation, setOperation] = useState<PracticeOperation>('mixed');
   const [difficulty, setDifficulty] = useState<Difficulty>(1);
 
@@ -23,7 +27,7 @@ export function PracticeScreen() {
         <AppText variant="heading" accessibilityRole="header">Difficulty</AppText>
         <DifficultyPicker value={difficulty} onChange={setDifficulty} />
       </View>
-      <AppText tone="muted" variant="caption">Playable sessions are coming in the next build.</AppText>
+      <Button label="Start practice" onPress={() => router.navigate({ pathname: '/session', params: sessionParams(operation, difficulty) })} />
     </Screen>
   );
 }

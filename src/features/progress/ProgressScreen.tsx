@@ -8,8 +8,8 @@ export function ProgressScreen() {
     <Screen>
       <Header title="Progress" />
       <Surface>
-        <AppText variant="heading">No sessions yet</AppText>
-        <AppText tone="muted">Your practice history will appear here.</AppText>
+        <AppText variant="heading">Session history</AppText>
+        <AppText tone="muted">History is not saved in this build.</AppText>
       </Surface>
     </Screen>
   );
