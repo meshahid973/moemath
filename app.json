@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "MoeMath",
+    "slug": "moemath",
+    "version": "0.1.0",
+    "scheme": "moemath",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "platforms": [
+      "android",
+      "ios"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.coderpixel.moemath",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.coderpixel.moemath"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ]
+  }
+}

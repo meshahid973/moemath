@@ -1,0 +1,28 @@
+import { StyleSheet, View } from 'react-native';
+import { AppText } from '@/components/ui/AppText';
+import { ChoiceRow } from '@/components/ui/ChoiceRow';
+import { Header } from '@/components/ui/Header';
+import { Screen } from '@/components/ui/Screen';
+import { useTheme } from '@/theme/provider';
+import { spacing, type ThemeMode } from '@/theme/tokens';
+
+const modes: { value: ThemeMode; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Sakura Light' },
+  { value: 'dark', label: 'Midnight Moe' },
+];
+
+export function SettingsScreen() {
+  const { mode, setMode } = useTheme();
+  return (
+    <Screen full>
+      <Header title="Settings" back />
+      <View style={styles.group} accessibilityRole="radiogroup">
+        <AppText variant="heading">Appearance</AppText>
+        {modes.map(({ value, label }) => <ChoiceRow key={value} label={label} selected={mode === value} onPress={() => setMode(value)} />)}
+      </View>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({ group: { gap: spacing.sm } });
