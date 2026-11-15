@@ -1,0 +1,27 @@
+name: Export dependencies
+on:
+  push:
+    branches: [chore/progress-export-deps]
+permissions:
+  contents: write
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci
+      - run: npx expo install expo-file-system expo-sharing
+      - run: npm ci
+      - run: npx expo install --check
+      - run: npx expo-doctor
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git rm .github/workflows/progress-export.yml
+          git commit -m "Install native export dependencies"
+          git push origin HEAD:refs/heads/chore/progress-export-deps
