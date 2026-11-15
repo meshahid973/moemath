@@ -9,10 +9,10 @@ type Props = Pick<PressableProps, 'onPress' | 'disabled' | 'testID'> & { label: 
 export function Button({ label, disabled, ...props }: Props) {
   const { colors } = useTheme();
   const scale = useSharedValue(1);
-  const motion = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const motion = useAnimatedStyle(() => ({ transform: [{ scale: scale.get() }] }));
 
   function animate(value: number, duration: number) {
-    scale.value = withTiming(value, { duration, reduceMotion: ReduceMotion.System });
+    scale.set(withTiming(value, { duration, reduceMotion: ReduceMotion.System }));
   }
 
   return (
