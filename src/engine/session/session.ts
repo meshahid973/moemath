@@ -8,6 +8,7 @@ export type SessionAttempt = Attempt & Readonly<{
 }>;
 
 export type Session = Readonly<{
+  id?: string;
   phase: 'ready' | 'active' | 'paused' | 'completed';
   questions: readonly Question[];
   attempts: readonly SessionAttempt[];
@@ -29,8 +30,9 @@ const MAX_INPUT_LENGTH = 5;
 
 export function createSession(options: SessionOptions): Session {
   return {
+    id: options.id,
     phase: 'ready',
-    questions: generateQuestions(options),
+    questions: options.planned ?? generateQuestions(options),
     attempts: [],
     input: '',
     elapsedBefore: 0,

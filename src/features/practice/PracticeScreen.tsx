@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { SwitchRow } from '@/components/ui/SwitchRow';
+import { AppText } from '@/components/ui/AppText';
+import { useAdaptive } from '@/features/adaptive/AdaptiveProvider';
 import { Button } from '@/components/ui/Button';
 import { sessionParams } from '@/engine/session/options';
 import { View, StyleSheet } from 'react-native';
@@ -13,6 +16,9 @@ import { OperationPicker } from './OperationPicker';
 
 export function PracticeScreen() {
   const router = useRouter();
+  const { ready, error } = useAdaptive();
+  const [adaptive, setAdaptive] = useState(true);
+  const personalized = adaptive && ready && !error;
   const [operation, setOperation] = useState<PracticeOperation>('mixed');
   const [difficulty, setDifficulty] = useState<Difficulty>(1);
 
@@ -25,9 +31,10 @@ export function PracticeScreen() {
       </View>
       <View style={styles.group}>
         <SectionTitle title="Difficulty" />
-        <DifficultyPicker value={difficulty} onChange={setDifficulty} />
+        <SwitchRow label="Adaptive difficulty" value={personalized} onChange={setAdaptive} />
+        {personalized ? <AppText variant="caption" tone="muted">Questions adjust to your skill level.</AppText> : <DifficultyPicker value={difficulty} onChange={setDifficulty} />}
       </View>
-      <Button label="Start practice" arrow onPress={() => router.navigate({ pathname: '/session', params: sessionParams(operation, difficulty) })} />
+      <Button label="Start practice" arrow onPress={() => router.navigate({ pathname: '/session', params: sessionParams(operation, difficulty, personalized) })} />
     </Screen>
   );
 }

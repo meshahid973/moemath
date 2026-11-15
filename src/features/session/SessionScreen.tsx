@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { Alert, AppState, BackHandler, Platform, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Pause, X } from 'lucide-react-native';
@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
 import { Screen } from '@/components/ui/Screen';
 import type { SessionOptions } from '@/engine/arithmetic/questions';
+import { adaptiveQuestions } from '@/engine/adaptive/plan';
+import { useAdaptive } from '@/features/adaptive/AdaptiveProvider';
 import { createSeed } from '@/engine/session/options';
 import { createSession, sessionReducer } from '@/engine/session/session';
 import { spacing } from '@/theme/tokens';
@@ -23,7 +25,14 @@ import { SessionTimer } from './SessionTimer';
 
 export function SessionScreen({ options }: { options: SessionOptions }) {
   const router = useRouter();
-  const [state, dispatch] = useReducer(sessionReducer, options, createSession);
+  const { profile, record } = useAdaptive();
+  const [state, dispatch] = useReducer(sessionReducer, options, initial => createSession({ ...initial, planned: initial.adaptive ? adaptiveQuestions(profile, initial.operation, initial.seed ?? 0, Date.now()) : undefined }));
+  const recorded = useRef<readonly unknown[] | undefined>(undefined);
+  useEffect(() => {
+    if (state.phase !== 'completed' || recorded.current === state.attempts) return;
+    recorded.current = state.attempts;
+    record(state.id ?? (Date.now() + ':' + createSeed()), state.attempts);
+  }, [state.phase, state.attempts, state.id, record]);
   const index = state.attempts.length;
   const question = state.questions[index];
   const total = state.questions.length;
@@ -39,8 +48,10 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
   const pause = useCallback(() => dispatch({ type: 'pause', now: performance.now() }), []);
   const resume = useCallback(() => dispatch({ type: 'resume', now: performance.now() }), []);
   const retry = useCallback(() => {
-    dispatch({ type: 'restart', options: { ...options, seed: createSeed() }, now: performance.now() });
-  }, [options]);
+    const seed = createSeed();
+    const now = Date.now();
+    dispatch({ type: 'restart', options: { ...options, seed, id: now + ':' + seed, planned: options.adaptive ? adaptiveQuestions(profile, options.operation, seed, now) : undefined }, now: performance.now() });
+  }, [options, profile]);
 
   const confirmExit = useCallback(() => {
     pause();
