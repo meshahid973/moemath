@@ -1,0 +1,26 @@
+name: Resolve audio dependency
+on:
+  push:
+    branches: [chore/polish-audio-dependency]
+permissions:
+  contents: write
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci
+      - run: npx expo install expo-audio
+      - run: npm ci
+      - run: npx expo install --check
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git rm .github/workflows/polish-audio.yml
+          git commit -m "Install Expo Audio"
+          git push origin HEAD:refs/heads/chore/polish-audio-dependency
