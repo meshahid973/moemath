@@ -24,7 +24,6 @@ export function AdaptiveProvider({ children }: PropsWithChildren) {
   const flush = useCallback(async () => {
     if (running.current) return;
     running.current = true;
-    setPending(true);
     try {
       setProfile(await loadProfile());
       setReady(true);
@@ -45,9 +44,13 @@ export function AdaptiveProvider({ children }: PropsWithChildren) {
 
   const record = useCallback((id: string, attempts: readonly SessionAttempt[]) => {
     if (!queue.current.has(id)) queue.current.set(id, { attempts, now: Date.now() });
+    setPending(true);
     void flush();
   }, [flush]);
-  const retrySave = useCallback(() => { void flush(); }, [flush]);
+  const retrySave = useCallback(() => {
+    setPending(true);
+    void flush();
+  }, [flush]);
   const value = useMemo(() => ({ profile, ready, error, pending, record, retrySave }), [profile, ready, error, pending, record, retrySave]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
