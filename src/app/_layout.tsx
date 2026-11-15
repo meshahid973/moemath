@@ -28,6 +28,9 @@ function Navigation() {
       <Stack screenOptions={screenOptions}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="history" />
+        <Stack.Screen name="history-detail" />
+        <Stack.Screen name="review" />
         <Stack.Screen name="session" options={{ gestureEnabled: false }} />
       </Stack>
     </>

@@ -47,8 +47,8 @@ export function ProgressScreen() {
         </> : !totals ? <AppText tone="muted">Loading progress...</AppText> : <>
           <View style={styles.grid}>
             <Metric label="Answered" value={String(totals.total)} />
-            <Metric label="Accuracy" value={totals.accuracy === null ? '—' : Math.round(totals.accuracy * 100) + '%'} />
-            <Metric label="Avg. response" value={totals.averageMs === null ? '—' : (totals.averageMs / 1000).toFixed(1) + 's'} />
+            <Metric label="Accuracy" value={totals.accuracy === null ? 'N/A' : Math.round(totals.accuracy * 100) + '%'} />
+            <Metric label="Avg. response" value={totals.averageMs === null ? 'N/A' : (totals.averageMs / 1000).toFixed(1) + 's'} />
             <Metric label="Sessions" value={String(totals.sessions)} />
           </View>
           {totals.total > 0 && rows ? <>

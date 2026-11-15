@@ -1,3 +1,4 @@
+import { DataSettings } from './DataSettings';
 import { PreferencesStatus } from './PreferencesStatus';
 import { StyleSheet, View } from 'react-native';
 import { SectionTitle } from '@/components/ui/SectionTitle';
@@ -33,6 +34,7 @@ export function SettingsScreen() {
         <SwitchRow label="Sound effects" value={soundEffects} onChange={setSoundEffects} />
       </View>
       <PreferencesStatus />
+      <DataSettings />
     </Screen>
   );
 }
