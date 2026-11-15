@@ -104,3 +104,18 @@ test('stale callbacks from a restarted session cannot enter or submit answers', 
   state = enter(state, 1);
   assert.equal(sessionReducer(state, { type: 'submit', index: 0, now: 300, generation: old }), state);
 });
+
+
+test('completion date is captured at the accepted final submit and resets on restart', () => {
+  let state = sessionReducer(createSession({...options,count:1}),{type:'start',now:100});
+  state = enter(state,state.questions[0].answer);
+  const wallTime = new Date(2026,10,14,23,59,59).getTime();
+  state = sessionReducer(state,{type:'submit',index:0,now:600,wallTime,day:'2026-11-14'});
+  assert.equal(state.completedAt,wallTime);
+  assert.equal(state.completedDay,'2026-11-14');
+  assert.equal(state.attempts[0].elapsedMs,500);
+  assert.equal(sessionReducer(state,{type:'submit',index:0,now:1000,wallTime:wallTime+2000,day:'2026-11-15'}),state);
+  const restarted = sessionReducer(state,{type:'restart',options,now:2000});
+  assert.equal(restarted.completedAt,undefined);
+  assert.equal(restarted.completedDay,undefined);
+});
