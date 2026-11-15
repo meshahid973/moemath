@@ -62,7 +62,8 @@ export function learn(profile: Profile, attempts: readonly SessionAttempt[], now
     const skill = skills[op];
     if (skill.recent === profile.skills[op].recent || skill.recent.length < WINDOW) continue;
     const a = accuracy(skill)!;
-    const speeds = skill.recent.flatMap(x => x.ratio === null ? [] : [x.ratio]);
+    const speeds: number[] = [];
+    for (const item of skill.recent) if (item.ratio !== null) speeds.push(item.ratio);
     const level = a >= 0.9 && speeds.length >= 8 && median(speeds) <= 1 && skill.level < 6
       ? skill.level + 1
       : a <= 0.5 && skill.level > 1 ? skill.level - 1 : skill.level;

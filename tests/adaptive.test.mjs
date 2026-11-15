@@ -55,3 +55,21 @@ test('adaptive sessions stay deterministic, distinct, bounded and include due mi
     }
   }
 });
+
+
+test('long practice runs keep mastery windows and review memory bounded', () => {
+  let profile = emptyProfile();
+  for (let i = 0; i < 1000; i++) {
+    const date = now + i * 3600000;
+    const questions = adaptiveQuestions(profile, 'mixed', i, date);
+    const attempts = questions.map((question, j) => ({
+      question, expected: question.answer, submitted: (i + j) % 3 === 0 ? question.answer : question.answer + 1,
+      elapsedMs: 2000, interrupted: false,
+    }));
+    profile = learn(profile, attempts, date);
+    assert.ok(profile.review.length <= 120);
+    assert.ok(Object.values(profile.skills).every(skill => skill.recent.length <= 12 && skill.level >= 1 && skill.level <= 6));
+    assert.equal(new Set(profile.review.map(item => item.question.key)).size, profile.review.length);
+  }
+  assert.equal(Object.values(profile.skills).reduce((sum, skill) => sum + skill.seen, 0), 10000);
+});
