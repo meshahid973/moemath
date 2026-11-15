@@ -34,8 +34,7 @@ export async function exportPracticeData() {
       await append(']}');
     });
   } catch (error) {
-    handle.close();
-    if (file.exists) file.delete();
+    try { handle.close(); } finally { if (file.exists) file.delete(); }
     throw error;
   }
   handle.close();

@@ -38,7 +38,10 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
     loading.current = true;
     try {
       const saved = await loadPreferences();
-      setPreferences({ ...saved, ...Object.fromEntries(dirty.current) });
+      const next = { ...saved, ...Object.fromEntries(dirty.current) };
+      setPreferences(previous => {
+        return (Object.keys(next) as (keyof Preferences)[]).every(key => next[key] === previous[key]) ? previous : next;
+      });
       setReady(true);
       await flush();
     } catch {

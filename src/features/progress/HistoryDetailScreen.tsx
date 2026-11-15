@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { Button } from '@/components/ui/Button';
 import { AppText } from '@/components/ui/AppText';
 import { Header } from '@/components/ui/Header';
 import { Screen } from '@/components/ui/Screen';
@@ -10,16 +11,18 @@ import { useTheme } from '@/theme/provider';
 
 export function HistoryDetailScreen() {
   const { id } = useLocalSearchParams<{id: string}>();
+  const [error, setError] = useState(false);
+  const [retry, setRetry] = useState(0);
   const [detail, setDetail] = useState<SessionDetail | null | undefined>(undefined);
   const { colors } = useTheme();
   useFocusEffect(useCallback(() => {
     let active = true;
-    void sessionDetail(typeof id === 'string' ? id : '').then(row => { if (active) setDetail(row); }, () => { if (active) setDetail(null); });
+    void sessionDetail(typeof id === 'string' ? id : '').then(row => { if (active) { setDetail(row); setError(false); } }, () => { if (active) setError(true); });
     return () => { active = false; };
-  }, [id]));
+  }, [id, retry]));
   return <Screen full>
     <Header title="Session details" back />
-    {detail === undefined ? <AppText tone="muted">Loading session...</AppText> : detail === null ? <AppText tone="muted">Session unavailable.</AppText> : <>
+    {error ? <><AppText tone="muted">Could not load session.</AppText><Button label="Retry" variant="secondary" onPress={() => setRetry(x => x + 1)} /></> : detail === undefined ? <AppText tone="muted">Loading session...</AppText> : detail === null ? <AppText tone="muted">Session unavailable.</AppText> : <>
       <Surface>
         <AppText variant="caption" tone="muted">{new Date(detail.completedAt).toLocaleString()}</AppText>
         <AppText variant="title" tone="primary">{detail.correct}/{detail.total}</AppText>
