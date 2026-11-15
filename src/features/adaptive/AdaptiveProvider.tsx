@@ -40,7 +40,14 @@ export function AdaptiveProvider({ children }: PropsWithChildren) {
     }
   }, []);
 
-  useEffect(() => { void flush(); }, [flush]);
+  useEffect(() => {
+    let cancelled = false;
+    // Start storage work outside the effect's synchronous render cycle.
+    void Promise.resolve().then(() => {
+      if (!cancelled) return flush();
+    });
+    return () => { cancelled = true; };
+  }, [flush]);
 
   const record = useCallback((id: string, attempts: readonly SessionAttempt[]) => {
     if (!queue.current.has(id)) queue.current.set(id, { attempts, now: Date.now() });
