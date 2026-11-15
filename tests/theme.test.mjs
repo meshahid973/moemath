@@ -25,6 +25,9 @@ for (const [name, colors] of Object.entries(palettes)) {
     for (const background of [colors.background, colors.surface, colors.tint]) {
       assert.ok(contrast(colors.text, background) >= 4.5);
       assert.ok(contrast(colors.muted, background) >= 4.5);
+      assert.ok(contrast(colors.primary, background) >= 4.5);
+      assert.ok(contrast(colors.success, background) >= 4.5);
+      assert.ok(contrast(colors.danger, background) >= 4.5);
     }
     assert.ok(contrast(colors.onPrimary, colors.primary) >= 4.5);
   });

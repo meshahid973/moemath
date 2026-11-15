@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer } from 'react';
-import { Alert, AppState, BackHandler, StyleSheet, View } from 'react-native';
+import { Alert, AppState, BackHandler, Platform, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Pause, X } from 'lucide-react-native';
 import { AppText } from '@/components/ui/AppText';
@@ -46,12 +46,16 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
     const subscription = AppState.addEventListener('change', (next) => {
       if (next !== 'active') pause();
     });
+    const blur = Platform.OS === 'android' ? AppState.addEventListener('blur', pause) : undefined;
     if (AppState.currentState === 'active' || AppState.currentState === null) {
       dispatch({ type: 'start', now: performance.now() });
     } else {
       pause();
     }
-    return () => subscription.remove();
+    return () => {
+      subscription.remove();
+      blur?.remove();
+    };
   }, [pause]);
 
   useEffect(() => {

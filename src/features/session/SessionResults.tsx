@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { ArrowLeft, CheckCircle2, RotateCcw } from 'lucide-react-native';
+import { ArrowLeft, CheckCircle2 } from 'lucide-react-native';
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
@@ -23,7 +23,6 @@ export function SessionResults({ attempts, onRetry, onDone }: Props) {
       <View style={styles.header}>
         <IconButton icon={ArrowLeft} label="Back" onPress={onDone} />
         <AppText variant="title" accessibilityRole="header" style={styles.headerTitle}>Results</AppText>
-        <IconButton icon={RotateCcw} label="Practice again" onPress={onRetry} />
       </View>
       <Surface style={[styles.result, { backgroundColor: colors.tint }]}>
         <AppText variant="caption" tone="muted">Correct answers</AppText>
@@ -42,7 +41,7 @@ export function SessionResults({ attempts, onRetry, onDone }: Props) {
               <AppText variant="label">{equation(attempt.question)}</AppText>
               <View style={styles.answers}>
                 <AppText variant="caption" tone="muted">Your answer: {attempt.submitted ?? 'Skipped'}</AppText>
-                <AppText variant="label" style={{ color: colors.success }}>{attempt.expected}</AppText>
+                <AppText variant="label" style={{ color: colors.success }}>Correct: {attempt.expected}</AppText>
               </View>
             </Surface>
           ))}

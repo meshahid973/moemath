@@ -6,7 +6,7 @@ export const palettes = {
   light: {
     background: '#FAF8FC',
     surface: '#FFFFFF',
-    primary: '#7957B3',
+    primary: '#7755B0',
     onPrimary: '#FFFFFF',
     tint: '#EDE5F7',
     accent: '#E8A8BC',
