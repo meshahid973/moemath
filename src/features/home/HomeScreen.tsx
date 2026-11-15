@@ -19,16 +19,21 @@ export function HomeScreen() {
   const { width, fontScale } = useWindowDimensions();
   const { showCompanion } = useCompanionSettings();
   const showArtwork = width >= 370 && fontScale <= 1.2;
-  const showPortrait = showArtwork && showCompanion && hasCompanion;
+  const showPortrait = showCompanion && hasCompanion;
 
   return (
     <Screen>
       <Header title="MoeMath" />
       <Surface style={[styles.panel, { backgroundColor: colors.tint }]}>
-        {showPortrait ? <View pointerEvents="none" style={styles.portrait}><CompanionPortrait expression="neutral" size={148} /></View> : showArtwork && <PracticeArtwork />}
-        <View style={[styles.hero, showArtwork && styles.illustrated]}>
-          <AppText variant="heading" style={styles.title}>Daily practice</AppText>
-          <AppText tone="muted">10 questions</AppText>
+        {!showPortrait && showArtwork && <PracticeArtwork />}
+        <View style={[styles.hero, showPortrait && showArtwork && styles.horizontal, !showPortrait && showArtwork && styles.illustrated]}>
+          <View style={styles.copy}>
+            <AppText variant="heading" style={styles.title}>Daily practice</AppText>
+            <AppText tone="muted">10 questions</AppText>
+          </View>
+          {showPortrait && <View pointerEvents="none" style={styles.portrait}>
+            <CompanionPortrait expression="neutral" size={showArtwork ? 136 : 110} />
+          </View>}
         </View>
         <Button label="Start practice" onPress={() => router.navigate({ pathname: '/session', params: sessionParams('mixed', 1) })} />
       </Surface>
@@ -42,9 +47,11 @@ export function HomeScreen() {
 
 const styles = StyleSheet.create({
   panel: { overflow: 'hidden' },
-  portrait: { position: 'absolute', right: spacing.sm, top: spacing.xs },
+  portrait: { alignSelf: 'center' },
+  horizontal: { flexDirection: 'row', alignItems: 'center' },
+  copy: { flexShrink: 1, gap: spacing.sm },
   quick: { gap: spacing.md },
-  hero: { gap: spacing.sm, minHeight: 100, justifyContent: 'center', paddingVertical: spacing.lg },
+  hero: { gap: spacing.sm, minHeight: 100, justifyContent: 'center', paddingVertical: spacing.sm },
   illustrated: { paddingRight: 138 },
   title: { fontSize: 26, lineHeight: 32 },
 });
