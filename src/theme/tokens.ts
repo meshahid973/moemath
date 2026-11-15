@@ -11,7 +11,7 @@ export const palettes = {
     tint: '#EDE5F7',
     accent: '#E8A8BC',
     text: '#302638',
-    muted: '#746A7E',
+    muted: '#695E74',
     border: '#DCD3E5',
   },
   dark: {
