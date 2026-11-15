@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, type PropsWithChildren } from 'react';
-import { usePreferences } from '@/features/settings/PreferencesProvider';
+import { useStoredAppearance } from '@/features/settings/PreferencesProvider';
 import { useColorScheme } from 'react-native';
 import { palettes, resolveTheme, type Palette, type ThemeMode } from './tokens';
 
@@ -14,8 +14,7 @@ const themes = {
 
 export function ThemeProvider({ children }: PropsWithChildren) {
   const system = useColorScheme();
-  const { preferences, setPreference } = usePreferences();
-  const mode = preferences.mode;
+  const { mode, setPreference } = useStoredAppearance();
   const setMode = useCallback((value: ThemeMode) => setPreference('mode', value), [setPreference]);
   const appearance = useMemo(() => ({ mode, setMode }), [mode, setMode]);
   const theme = themes[resolveTheme(mode, system)];

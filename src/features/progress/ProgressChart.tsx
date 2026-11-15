@@ -26,6 +26,7 @@ function display(n: number | null, metric: Metric) {
 // Native SVG chart: bounded to 30 points, tap inspection and accessible increment/decrement.
 export const ProgressChart = memo(function ProgressChart({ rows, metric }: { rows: readonly DailyTotals[]; metric: Metric }) {
   const { colors } = useTheme();
+  const [plotWidth, setPlotWidth] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   if (!rows.length) return null;
   const index = Math.min(rows.length - 1, selected ?? rows.length - 1);
@@ -56,6 +57,7 @@ export const ProgressChart = memo(function ProgressChart({ rows, metric }: { row
         accessibilityValue={{ text: active.day + ': ' + display(values[index] ?? null, metric) }}
         accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
         onAccessibilityAction={event => choose(index + (event.nativeEvent.actionName === 'increment' ? 1 : -1))}
+        onLayout={event => setPlotWidth(event.nativeEvent.layout.width)}
         style={styles.plot}
       >
         <Svg width="100%" height={HEIGHT} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none">
@@ -70,11 +72,9 @@ export const ProgressChart = memo(function ProgressChart({ rows, metric }: { row
             {values.map((v, i) => v === null ? null : <Circle key={rows[i]!.day} cx={x(i)} cy={y(v)} r={i === index ? 4.5 : 2.5} fill={colors.surface} stroke={colors.primary} strokeWidth={2} />)}
           </>}
         </Svg>
-        <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-          <View style={styles.targets}>
-            {rows.map((row, i) => <Pressable key={row.day} accessible={false} onPress={() => choose(i)} style={styles.target} />)}
-          </View>
-        </View>
+        <Pressable accessible={false} onPress={event => {
+          if (plotWidth > 0) choose(Math.floor(event.nativeEvent.locationX / plotWidth * rows.length));
+        }} style={StyleSheet.absoluteFill} />
       </View>
       <View style={styles.axis}>
         <AppText variant="caption" tone="muted">{rows[0]!.day.slice(5)}</AppText>
@@ -88,7 +88,5 @@ const styles = StyleSheet.create({
   chart: { gap: spacing.xs },
   readout: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' },
   plot: { height: HEIGHT },
-  targets: { flex: 1, flexDirection: 'row' },
-  target: { flex: 1 },
   axis: { flexDirection: 'row', justifyContent: 'space-between' },
 });

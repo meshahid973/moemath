@@ -1,9 +1,8 @@
 import { useCallback, useMemo } from 'react';
-import { usePreferences } from '@/features/settings/PreferencesProvider';
+import { useStoredCompanion } from '@/features/settings/PreferencesProvider';
 
 export function useCompanionSettings() {
-  const { preferences, setPreference } = usePreferences();
-  const { showCompanion, haptics, soundEffects } = preferences;
+  const { showCompanion, haptics, soundEffects, setPreference } = useStoredCompanion();
   const setShowCompanion = useCallback((value: boolean) => setPreference('showCompanion', value), [setPreference]);
   const setHaptics = useCallback((value: boolean) => setPreference('haptics', value), [setPreference]);
   const setSoundEffects = useCallback((value: boolean) => setPreference('soundEffects', value), [setPreference]);

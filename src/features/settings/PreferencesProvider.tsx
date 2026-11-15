@@ -4,6 +4,9 @@ import { loadPreferences, savePreference } from '@/database/preferences';
 
 type ContextValue = { preferences: Preferences; setPreference: <K extends keyof Preferences>(key: K, value: Preferences[K]) => void; error: boolean; ready: boolean; retry: () => void };
 const Context = createContext<ContextValue | null>(null);
+const ModeContext = createContext<Pick<ContextValue, 'setPreference'> & { mode: Preferences['mode'] } | null>(null);
+const CompanionContext = createContext<Pick<ContextValue, 'setPreference'> & Omit<Preferences, 'mode'> | null>(null);
+const ReadyContext = createContext(false);
 
 export function PreferencesProvider({ children }: PropsWithChildren) {
   const [preferences, setPreferences] = useState(defaultPreferences);
@@ -54,17 +57,40 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
 
   const setPreference = useCallback(<K extends keyof Preferences>(key: K, value: Preferences[K]) => {
     dirty.current.set(key, value);
-    setPreferences(previous => ({ ...previous, [key]: value }));
+    setPreferences(previous => previous[key] === value ? previous : { ...previous, [key]: value });
     if (!loading.current) void flush();
   }, [flush]);
 
   const retry = useCallback(() => { void load(); }, [load]);
   const result = useMemo(() => ({ preferences, setPreference, error, ready, retry }), [preferences, setPreference, error, ready, retry]);
-  return <Context.Provider value={result}>{children}</Context.Provider>;
+  const { mode, showCompanion, haptics, soundEffects } = preferences;
+  const appearance = useMemo(() => ({ mode, setPreference }), [mode, setPreference]);
+  const companion = useMemo(() => ({ showCompanion, haptics, soundEffects, setPreference }), [showCompanion, haptics, soundEffects, setPreference]);
+  return <Context.Provider value={result}>
+    <ReadyContext.Provider value={ready}>
+      <ModeContext.Provider value={appearance}>
+        <CompanionContext.Provider value={companion}>{children}</CompanionContext.Provider>
+      </ModeContext.Provider>
+    </ReadyContext.Provider>
+  </Context.Provider>;
 }
 
 export function usePreferences() {
   const value = useContext(Context);
+  if (!value) throw new Error('PreferencesProvider missing');
+  return value;
+}
+
+export function usePreferencesReady() { return useContext(ReadyContext); }
+
+export function useStoredAppearance() {
+  const value = useContext(ModeContext);
+  if (!value) throw new Error('PreferencesProvider missing');
+  return value;
+}
+
+export function useStoredCompanion() {
+  const value = useContext(CompanionContext);
   if (!value) throw new Error('PreferencesProvider missing');
   return value;
 }

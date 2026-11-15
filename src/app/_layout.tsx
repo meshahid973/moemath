@@ -8,7 +8,7 @@ import { NunitoSans_400Regular, NunitoSans_600SemiBold, NunitoSans_700Bold } fro
 import { ThemeProvider, useTheme } from '@/theme/provider';
 
 import { AdaptiveProvider } from '@/features/adaptive/AdaptiveProvider';
-import { PreferencesProvider, usePreferences } from '@/features/settings/PreferencesProvider';
+import { PreferencesProvider, usePreferencesReady } from '@/features/settings/PreferencesProvider';
 
 enableFreeze(true);
 
@@ -38,7 +38,7 @@ function Navigation() {
 }
 
 function ReadyApp() {
-  const { ready } = usePreferences();
+  const ready = usePreferencesReady();
   return ready ? <ThemeProvider><AdaptiveProvider><Navigation /></AdaptiveProvider></ThemeProvider> : null;
 }
 

@@ -41,3 +41,30 @@ test('migration preserves old skill rows, history writes and IDs are atomic', ()
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM practice_sessions').get().n, 0);
   db.close();
 });
+
+
+test('indexed cursor pagination handles tied timestamps and reset preserves settings', () => {
+  const db = new DatabaseSync(':memory:');
+  try {
+    db.exec(adaptiveSchema);
+    db.exec(progressSchema);
+    db.exec("INSERT INTO preferences VALUES ('mode','dark')");
+    const insert = db.prepare('INSERT INTO practice_sessions VALUES (?, ?, ?, ?, ?, ?, ?)');
+    for (let i = 0; i < 205; i++) insert.run(String(i).padStart(4,'0'), Math.floor(i / 5), '2026-01-01', 10, 8, 1000, '[]');
+    const results = [];
+    let cursor;
+    while (true) {
+      const page = cursor
+        ? db.prepare('SELECT id,completed_at FROM practice_sessions WHERE (completed_at,id) < (?,?) ORDER BY completed_at DESC,id DESC LIMIT 20').all(cursor.completed_at,cursor.id)
+        : db.prepare('SELECT id,completed_at FROM practice_sessions ORDER BY completed_at DESC,id DESC LIMIT 20').all();
+      if (!page.length) break;
+      results.push(...page.map(x => x.id));
+      cursor = page.at(-1);
+    }
+    assert.equal(results.length, 205);
+    assert.equal(new Set(results).size, 205);
+    db.exec('DELETE FROM practice_sessions; DELETE FROM adaptive_completed; DELETE FROM adaptive_profile;');
+    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM practice_sessions').get().n, 0);
+    assert.equal(db.prepare("SELECT value FROM preferences WHERE key='mode'").get().value, 'dark');
+  } finally { db.close(); }
+});
