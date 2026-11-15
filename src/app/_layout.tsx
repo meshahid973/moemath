@@ -8,7 +8,7 @@ import { NunitoSans_400Regular, NunitoSans_600SemiBold, NunitoSans_700Bold } fro
 import { ThemeProvider, useTheme } from '@/theme/provider';
 
 import { AdaptiveProvider } from '@/features/adaptive/AdaptiveProvider';
-import { CompanionSettingsProvider } from '@/features/companion/CompanionSettings';
+import { PreferencesProvider, usePreferences } from '@/features/settings/PreferencesProvider';
 
 enableFreeze(true);
 
@@ -34,8 +34,13 @@ function Navigation() {
   );
 }
 
+function ReadyApp() {
+  const { ready } = usePreferences();
+  return ready ? <ThemeProvider><AdaptiveProvider><Navigation /></AdaptiveProvider></ThemeProvider> : null;
+}
+
 export default function RootLayout() {
   const [loaded, error] = useFonts(fonts);
   if (!loaded && !error) return null;
-  return <ThemeProvider><CompanionSettingsProvider><AdaptiveProvider><Navigation /></AdaptiveProvider></CompanionSettingsProvider></ThemeProvider>;
+  return <PreferencesProvider><ReadyApp /></PreferencesProvider>;
 }

@@ -47,7 +47,9 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
   }, [flush]);
 
   useEffect(() => {
-    void load();
+    let active = true;
+    void Promise.resolve().then(() => { if (active) return load(); });
+    return () => { active = false; };
   }, [load]);
 
   const setPreference = useCallback(<K extends keyof Preferences>(key: K, value: Preferences[K]) => {

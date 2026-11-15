@@ -1,3 +1,4 @@
+import { PreferencesStatus } from './PreferencesStatus';
 import { StyleSheet, View } from 'react-native';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { ChoiceRow } from '@/components/ui/ChoiceRow';
@@ -31,6 +32,7 @@ export function SettingsScreen() {
         <SwitchRow label="Haptic feedback" value={haptics} onChange={setHaptics} />
         <SwitchRow label="Sound effects" value={soundEffects} onChange={setSoundEffects} />
       </View>
+      <PreferencesStatus />
     </Screen>
   );
 }

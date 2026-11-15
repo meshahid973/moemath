@@ -1,12 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react';
 import { emptyProfile, type Profile } from '@/engine/adaptive/profile';
 import type { SessionAttempt } from '@/engine/session/session';
+import { resetPracticeData } from '@/database/history';
 import { loadProfile, saveCompleted } from '@/database/adaptive';
 
 type Snapshot = { profile: Profile; ready: boolean; error: boolean; pending: boolean };
 type Adaptive = Snapshot & {
   record: (id: string, attempts: readonly SessionAttempt[]) => void;
   retrySave: () => void;
+  reset: () => Promise<void>;
 };
 const Context = createContext<Adaptive | null>(null);
 const Availability = createContext(false);
@@ -62,7 +64,19 @@ export function AdaptiveProvider({ children }: PropsWithChildren) {
     startFlush();
   }, [startFlush]);
 
-  const value = useMemo(() => ({ ...snapshot, record, retrySave: startFlush }), [snapshot, record, startFlush]);
+  const reset = useCallback(async () => {
+    if (running.current || queue.current.size) throw new Error('Pending practice updates');
+    running.current = true;
+    try {
+      await resetPracticeData();
+      initialized.current = true;
+      setSnapshot({ profile: emptyProfile(), ready: true, pending: false, error: false });
+    } finally {
+      running.current = false;
+      if (queue.current.size) void flush();
+    }
+  }, [flush]);
+  const value = useMemo(() => ({ ...snapshot, record, retrySave: startFlush, reset }), [snapshot, record, startFlush, reset]);
   return (
     <Context.Provider value={value}>
       <Availability.Provider value={snapshot.ready && !snapshot.error}>{children}</Availability.Provider>
