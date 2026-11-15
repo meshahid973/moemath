@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { Header } from '@/components/ui/Header';
 import { Screen } from '@/components/ui/Screen';
@@ -11,15 +11,19 @@ import { formatEquation } from '@/engine/arithmetic/format';
 
 export function ReviewScreen() {
   const router = useRouter();
-  const { profile, ready, error } = useAdaptive();
-  const [now] = useState(() => Date.now());
+  const { profile, ready, error, pending } = useAdaptive();
+  const [now, setNow] = useState(() => Date.now());
+  useFocusEffect(useCallback(() => {
+    const timer = setTimeout(() => setNow(Date.now()), 0);
+    return () => clearTimeout(timer);
+  }, []));
   const items = profile.review.slice(0, 10);
   return <Screen full>
     <Header title="Review mistakes" back />
     <Surface>
       <AppText variant="heading">{profile.review.length} questions to review</AppText>
       <AppText tone="muted">Due questions return first. Early practice does not clear a scheduled review.</AppText>
-      <Button label="Start review" arrow disabled={!ready || error || !items.length} onPress={() => router.push({ pathname: '/session', params: { ...sessionParams('mixed', 1), review: '1' } })} />
+      <Button label="Start review" arrow disabled={!ready || error || pending || !items.length} onPress={() => router.push({ pathname: '/session', params: { ...sessionParams('mixed', 1), review: '1' } })} />
     </Surface>
     {items.map(item => <Surface key={item.question.key}>
       <AppText variant="heading">{formatEquation(item.question)}</AppText>

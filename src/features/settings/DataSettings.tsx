@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/Button';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { useAdaptive } from '@/features/adaptive/AdaptiveProvider';
 import { clearExportCache, exportPracticeData } from '@/database/export';
+import { usePreferences } from './PreferencesProvider';
 import { spacing } from '@/theme/tokens';
 
 export function DataSettings() {
   const { reset, pending, error } = useAdaptive();
+  const { error: preferenceError } = usePreferences();
   const [busy, setBusy] = useState(false);
 
   const exportData = async () => {
@@ -30,7 +32,7 @@ export function DataSettings() {
 
   return <View style={styles.group}>
     <SectionTitle title="Local data" />
-    <Button label={busy ? 'Working...' : 'Export data'} variant="secondary" disabled={busy || pending || error} onPress={() => { void exportData(); }} />
+    <Button label={busy ? 'Working...' : 'Export data'} variant="secondary" disabled={busy || pending || error || preferenceError} onPress={() => { void exportData(); }} />
     <Button label="Reset practice data" variant="secondary" disabled={busy || pending} onPress={() => Alert.alert('Reset practice data?', 'This permanently deletes saved history, skill levels and mistake reviews. Your appearance and sound settings will stay.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Reset', style: 'destructive', onPress: () => { void resetData(); } },

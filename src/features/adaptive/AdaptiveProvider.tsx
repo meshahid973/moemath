@@ -67,6 +67,7 @@ export function AdaptiveProvider({ children }: PropsWithChildren) {
   const reset = useCallback(async () => {
     if (running.current || queue.current.size) throw new Error('Pending practice updates');
     running.current = true;
+    setSnapshot(previous => ({ ...previous, pending: true }));
     try {
       await resetPracticeData();
       initialized.current = true;
@@ -74,12 +75,13 @@ export function AdaptiveProvider({ children }: PropsWithChildren) {
     } finally {
       running.current = false;
       if (queue.current.size) void flush();
+      else setSnapshot(previous => previous.pending ? { ...previous, pending: false } : previous);
     }
   }, [flush]);
   const value = useMemo(() => ({ ...snapshot, record, retrySave: startFlush, reset }), [snapshot, record, startFlush, reset]);
   return (
     <Context.Provider value={value}>
-      <Availability.Provider value={snapshot.ready && !snapshot.error}>{children}</Availability.Provider>
+      <Availability.Provider value={snapshot.ready && !snapshot.error && !snapshot.pending}>{children}</Availability.Provider>
     </Context.Provider>
   );
 }

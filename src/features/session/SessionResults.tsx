@@ -34,7 +34,7 @@ export const SessionResults = memo(function SessionResults({ attempts, onRetry, 
   return (
     <>
       <View style={styles.header}>
-        <IconButton icon={ArrowLeft} label="Back" onPress={saving ? () => {} : onDone} />
+        <IconButton icon={ArrowLeft} label="Back" onPress={onDone} disabled={saving} />
         <AppText variant="title" accessibilityRole="header" style={styles.headerTitle}>Results</AppText>
       </View>
       <Animated.View entering={enter}>
