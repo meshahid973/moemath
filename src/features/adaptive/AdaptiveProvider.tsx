@@ -17,7 +17,7 @@ export function AdaptiveProvider({ children }: PropsWithChildren) {
   const [profile, setProfile] = useState(emptyProfile);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(false);
-  const [pending, setPending] = useState(false);
+  const [pending, setPending] = useState(true);
   const queue = useRef(new Map<string, { attempts: readonly SessionAttempt[]; now: number }>());
   const running = useRef(false);
 

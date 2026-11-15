@@ -3,10 +3,11 @@ import { useTheme } from '@/theme/provider';
 import { radius, size, spacing } from '@/theme/tokens';
 import { AppText } from './AppText';
 
-export function SwitchRow({ label, value, onChange }: {
+export function SwitchRow({ label, value, onChange, disabled = false }: {
   label: string;
   value: boolean;
   onChange: (value: boolean) => void;
+  disabled?: boolean;
 }) {
   const { colors } = useTheme();
   return (
@@ -14,6 +15,7 @@ export function SwitchRow({ label, value, onChange }: {
       <AppText variant="label" style={styles.label}>{label}</AppText>
       <Switch
         accessibilityLabel={label}
+        disabled={disabled}
         value={value}
         onValueChange={onChange}
         trackColor={{ false: colors.border, true: colors.primary }}

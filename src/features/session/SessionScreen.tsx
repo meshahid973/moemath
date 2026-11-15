@@ -25,8 +25,8 @@ import { SessionTimer } from './SessionTimer';
 
 export function SessionScreen({ options }: { options: SessionOptions }) {
   const router = useRouter();
-  const { profile, record } = useAdaptive();
-  const [state, dispatch] = useReducer(sessionReducer, options, initial => createSession({ ...initial, planned: initial.adaptive ? adaptiveQuestions(profile, initial.operation, initial.seed ?? 0, Date.now()) : undefined }));
+  const { profile, record, ready, error } = useAdaptive();
+  const [state, dispatch] = useReducer(sessionReducer, options, initial => createSession({ ...initial, planned: initial.adaptive && ready && !error ? adaptiveQuestions(profile, initial.operation, initial.seed ?? 0, Number(initial.id?.split(':')[0]) || 0) : undefined }));
   const recorded = useRef<readonly unknown[] | undefined>(undefined);
   useEffect(() => {
     if (state.phase !== 'completed' || recorded.current === state.attempts) return;
@@ -50,8 +50,8 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
   const retry = useCallback(() => {
     const seed = createSeed();
     const now = Date.now();
-    dispatch({ type: 'restart', options: { ...options, seed, id: now + ':' + seed, planned: options.adaptive ? adaptiveQuestions(profile, options.operation, seed, now) : undefined }, now: performance.now() });
-  }, [options, profile]);
+    dispatch({ type: 'restart', options: { ...options, seed, id: now + ':' + seed, planned: options.adaptive && ready && !error ? adaptiveQuestions(profile, options.operation, seed, now) : undefined }, now: performance.now() });
+  }, [options, profile, ready, error]);
 
   const confirmExit = useCallback(() => {
     pause();

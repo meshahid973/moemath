@@ -31,7 +31,8 @@ export function PracticeScreen() {
       </View>
       <View style={styles.group}>
         <SectionTitle title="Difficulty" />
-        <SwitchRow label="Adaptive difficulty" value={personalized} onChange={setAdaptive} />
+        <SwitchRow label="Adaptive difficulty" value={personalized} onChange={setAdaptive} disabled={!ready || error} />
+        {(!ready || error) && <AppText variant="caption" tone="muted">Adaptive practice is unavailable. Manual practice still works.</AppText>}
         {personalized ? <AppText variant="caption" tone="muted">Questions adjust to your skill level.</AppText> : <DifficultyPicker value={difficulty} onChange={setDifficulty} />}
       </View>
       <Button label="Start practice" arrow onPress={() => router.navigate({ pathname: '/session', params: sessionParams(operation, difficulty, personalized) })} />

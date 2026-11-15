@@ -7,6 +7,7 @@ import { IconButton } from '@/components/ui/IconButton';
 import { PanelMotif } from '@/components/ui/PanelMotif';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { Surface } from '@/components/ui/Surface';
+import { SaveStatus } from '@/features/adaptive/SaveStatus';
 import { summarizeAttempts } from '@/engine/scoring';
 import type { SessionAttempt } from '@/engine/session/session';
 import { useTheme } from '@/theme/provider';
@@ -77,6 +78,7 @@ export function SessionResults({ attempts, onRetry, onDone }: Props) {
           </Surface>
         </View>
       )}
+      <SaveStatus />
       <Button label="Practice again" arrow onPress={onRetry} />
       <Button label="Done" variant="secondary" onPress={onDone} />
     </>

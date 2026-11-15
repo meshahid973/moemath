@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import { adaptiveSchema } from './schema';
 import { emptyProfile, learn, type Profile } from '@/engine/adaptive/profile';
 import type { SessionAttempt } from '@/engine/session/session';
 
@@ -9,9 +10,8 @@ function database() {
     opening = (async () => {
       const db = await SQLite.openDatabaseAsync('moemath.db');
       try {
-        await db.execAsync(`PRAGMA journal_mode = WAL;
-          CREATE TABLE IF NOT EXISTS adaptive_profile (id INTEGER PRIMARY KEY CHECK(id = 1), payload TEXT NOT NULL);
-          CREATE TABLE IF NOT EXISTS adaptive_completed (id TEXT PRIMARY KEY NOT NULL);`);
+        await db.execAsync('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
+        await db.execAsync(adaptiveSchema);
         return db;
       } catch (error) {
         await db.closeAsync();
