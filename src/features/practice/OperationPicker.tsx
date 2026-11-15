@@ -1,3 +1,4 @@
+import { useReducedMotion } from 'react-native-reanimated';
 import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import type { PracticeOperation } from '@/engine/arithmetic/types';
@@ -16,6 +17,7 @@ export function OperationPicker(props: Props) {
 }
 
 function OperationGrid({ value, onChange }: { value?: PracticeOperation; onChange: Props['onChange'] }) {
+  const reducedMotion = useReducedMotion();
   const { colors, scheme } = useTheme();
   const { width, fontScale } = useWindowDimensions();
   const singleColumn = width < 350 || fontScale > 1.3;
@@ -38,7 +40,7 @@ function OperationGrid({ value, onChange }: { value?: PracticeOperation; onChang
                 {
                   borderColor: selected ? accent : colors.border,
                   backgroundColor: selected || pressed ? colors.tint : colors.surface,
-                  transform: [{ scale: pressed ? 0.98 : 1 }],
+                  transform: [{ scale: pressed && !reducedMotion ? 0.98 : 1 }],
                 },
               ]}
             >

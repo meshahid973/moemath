@@ -14,7 +14,7 @@ import { spacing } from '@/theme/tokens';
 import { CompanionPortrait } from '@/features/companion/CompanionPortrait';
 import { useCompanionSettings } from '@/features/companion/CompanionSettings';
 import { resultExpression } from '@/features/companion/expressions';
-import { equation } from './QuestionStage';
+import { formatEquation } from '@/engine/arithmetic/format';
 import { formatTime } from './SessionTimer';
 
 const enter = FadeInDown.duration(220).reduceMotion(ReduceMotion.System);
@@ -40,14 +40,14 @@ export function SessionResults({ attempts, onRetry, onDone }: Props) {
           <PanelMotif />
           <View style={[styles.summary, horizontal && styles.horizontal]}>
             <View style={styles.scoreGroup}>
-              <AppText tone="muted" variant="caption" style={styles.eyebrow}>CORRECT ANSWERS</AppText>
+              <AppText variant="caption" style={styles.eyebrow}>CORRECT ANSWERS</AppText>
               <AppText variant="title" tone="primary" style={styles.score} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65}>{score.correct}/{score.total}</AppText>
               <AppText variant="label">{perfect ? 'Amazing!' : score.accuracy >= 0.8 ? 'Nice work!' : 'Keep practicing!'}</AppText>
             </View>
             {showCompanion && <CompanionPortrait expression={resultExpression(score.correct, score.total)} size={horizontal ? 148 : 128} />}
           </View>
           <View accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: score.total, now: score.correct }} style={[styles.bar, { backgroundColor: colors.border }]}>
-            <View style={[styles.fill, { width: (Math.round(score.accuracy * 100) + '%') as `${number}%`, backgroundColor: colors.primary }]} />
+            <View style={[styles.fill, { width: `${Math.round(score.accuracy * 100)}%`, backgroundColor: colors.primary }]} />
           </View>
           <View style={styles.metrics}>
             <Metric label="Accuracy" value={Math.round(score.accuracy * 100) + '%'} />
@@ -67,7 +67,7 @@ export function SessionResults({ attempts, onRetry, onDone }: Props) {
           <Surface style={styles.reviewPanel}>
             {mistakes.map((attempt, index) => (
               <View key={attempt.question.key} style={[styles.reviewRow, index > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }]}>
-                <AppText variant="label">{equation(attempt.question)}</AppText>
+                <AppText variant="label">{formatEquation(attempt.question)}</AppText>
                 <View style={styles.answers}>
                   <AppText variant="caption" tone="muted">Your answer: {attempt.submitted ?? 'Skipped'}</AppText>
                   <AppText variant="label" style={{ color: colors.success }}>Correct: {attempt.expected}</AppText>
@@ -87,7 +87,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.metric}>
       <AppText variant="heading" style={styles.metricValue}>{value}</AppText>
-      <AppText variant="caption" tone="muted" style={styles.metricLabel}>{label}</AppText>
+      <AppText variant="caption" style={styles.metricLabel}>{label}</AppText>
     </View>
   );
 }

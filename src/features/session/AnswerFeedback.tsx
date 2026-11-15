@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { cancelAnimation, FadeIn, ReduceMotion, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 import { CheckCircle2, XCircle } from 'lucide-react-native';
 import { AppText } from '@/components/ui/AppText';
-import { symbols } from '@/engine/arithmetic/types';
+import { formatEquation } from '@/engine/arithmetic/format';
 import type { SessionAttempt } from '@/engine/session/session';
 import { useTheme } from '@/theme/provider';
 import { spacing } from '@/theme/tokens';
@@ -38,7 +38,7 @@ export const AnswerFeedback = memo(function AnswerFeedback({ attempt }: { attemp
         <Animated.View key={attempt.question.key} entering={enter} style={styles.row}>
           <Icon size={18} color={color} strokeWidth={1.75} />
           <AppText variant="caption" accessibilityLiveRegion="polite" style={[styles.text, { color }]}>
-            {correct ? 'Correct!' : attempt.question.left + ' ' + symbols[attempt.question.operation] + ' ' + attempt.question.right + ' = ' + attempt.expected}
+            {correct ? 'Correct!' : formatEquation(attempt.question) + ' = ' + attempt.expected}
           </AppText>
         </Animated.View>
       </Animated.View>}

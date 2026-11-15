@@ -1,4 +1,4 @@
-import { symbols, type PracticeOperation } from '@/engine/arithmetic/types';
+import { symbols, type PracticeOperation } from '../../engine/arithmetic/types.ts';
 
 export const operationChoices = [
   { value: 'mixed', label: 'Mixed', mark: '±' },

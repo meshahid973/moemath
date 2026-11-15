@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import correctSound from '../../../assets/sounds/correct.wav';
 import retrySound from '../../../assets/sounds/retry.wav';
 import type { SessionAttempt } from '@/engine/session/session';
 
-export function AnswerSounds({ attempt, paused }: { attempt?: SessionAttempt; paused: boolean }) {
+export const AnswerSounds = memo(function AnswerSounds({ attempt, paused }: { attempt?: SessionAttempt; paused: boolean }) {
   const correct = useAudioPlayer(correctSound);
   const retry = useAudioPlayer(retrySound);
   const lastAttempt = useRef<SessionAttempt | undefined>(undefined);
@@ -37,4 +37,4 @@ export function AnswerSounds({ attempt, paused }: { attempt?: SessionAttempt; pa
   }, [attempt, paused, correct, retry]);
 
   return null;
-}
+});

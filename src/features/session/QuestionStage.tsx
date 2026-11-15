@@ -2,7 +2,9 @@ import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { AppText } from '@/components/ui/AppText';
-import { symbols, type Question } from '@/engine/arithmetic/types';
+import type { Question } from '@/engine/arithmetic/types';
+import { formatEquation } from '@/engine/arithmetic/format';
+import { useCompanionSettings } from '@/features/companion/CompanionSettings';
 import type { SessionAttempt } from '@/engine/session/session';
 import { useTheme } from '@/theme/provider';
 import { PanelMotif } from '@/components/ui/PanelMotif';
@@ -11,14 +13,10 @@ import { AnswerFeedback } from './AnswerFeedback';
 import { radius, spacing } from '@/theme/tokens';
 
 const questionAnimation = FadeIn.duration(100).reduceMotion(ReduceMotion.System);
-export function equation(question: Question) {
-  return question.left + ' ' + symbols[question.operation] + ' ' + question.right;
-}
-
 const Equation = memo(function Equation({ question }: { question: Question }) {
   return (
     <Animated.View key={question.key} entering={questionAnimation}>
-      <AppText variant="title" style={styles.equation} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>{equation(question)}</AppText>
+      <AppText variant="title" style={styles.equation} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>{formatEquation(question)}</AppText>
     </Animated.View>
   );
 });
@@ -29,9 +27,10 @@ export const QuestionStage = memo(function QuestionStage({ question, input, prev
   previous?: SessionAttempt;
 }) {
   const { colors } = useTheme();
+  const { showCompanion } = useCompanionSettings();
   return (
     <View style={[styles.panel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <PanelMotif subtle />
+      {showCompanion && <PanelMotif subtle />}
       <SessionCompanion previous={previous} />
       <Equation question={question} />
       <View style={[styles.answer, { backgroundColor: colors.tint }]}>

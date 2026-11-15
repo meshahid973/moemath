@@ -2,6 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { palettes, resolveTheme, size } from '../src/theme/tokens.ts';
 
+import { operationColors } from '../src/features/practice/operationAppearance.ts';
+
 function luminance(hex) {
   const channels = hex.slice(1).match(/../g).map((part) => parseInt(part, 16) / 255);
   return channels.map((c) => c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
@@ -37,3 +39,12 @@ test('controls have at least 48dp touch targets', () => {
   assert.ok(size.touch >= 48);
   assert.ok(size.button >= size.touch);
 });
+
+for (const [name, colors] of Object.entries(palettes)) {
+  test(name + ' operation symbols remain readable in selected and default tiles', () => {
+    for (const accent of Object.values(operationColors[name])) {
+      assert.ok(contrast(accent, colors.surface) >= 4.5);
+      assert.ok(contrast(accent, colors.tint) >= 4.5);
+    }
+  });
+}
