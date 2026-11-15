@@ -1,3 +1,4 @@
+import { useReducedMotion } from 'react-native-reanimated';
 import { memo } from 'react';
 import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Check, Delete } from 'lucide-react-native';
@@ -13,6 +14,7 @@ const rows: readonly (readonly Key[])[] = [
 type Props = { onKey: (key: Key) => void; canSubmit: boolean };
 
 export const Keypad = memo(function Keypad({ onKey, canSubmit }: Props) {
+  const reducedMotion = useReducedMotion();
   const { colors } = useTheme();
   const { height } = useWindowDimensions();
   const minHeight = height < 700 ? 50 : 62;
@@ -37,8 +39,9 @@ export const Keypad = memo(function Keypad({ onKey, canSubmit }: Props) {
                     minHeight,
                     backgroundColor: submit ? colors.primary : pressed || key === 'delete' ? colors.tint : colors.surface,
                     borderColor: submit ? colors.primary : colors.border,
+                    borderBottomColor: submit ? colors.onPrimary + '40' : pressed ? colors.primary : colors.border,
                     opacity: disabled ? 0.5 : pressed && submit ? 0.8 : 1,
-                    transform: [{ scale: pressed ? 0.97 : 1 }],
+                    transform: [{ scale: pressed && !reducedMotion ? 0.96 : 1 }],
                   },
                 ]}
               >
@@ -57,6 +60,6 @@ export const Keypad = memo(function Keypad({ onKey, canSubmit }: Props) {
 const styles = StyleSheet.create({
   grid: { gap: spacing.sm },
   row: { flexDirection: 'row', gap: spacing.sm },
-  key: { flex: 1, borderWidth: 1, borderRadius: radius.control, alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.xs },
+  key: { flex: 1, borderWidth: 1, borderBottomWidth: 3, borderRadius: radius.control, alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.xs },
   digit: { fontSize: 25, fontVariant: ['tabular-nums'] },
 });

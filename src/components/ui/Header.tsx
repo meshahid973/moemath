@@ -5,12 +5,12 @@ import { AppText } from './AppText';
 import { IconButton } from './IconButton';
 import { spacing } from '@/theme/tokens';
 
-export function Header({ title, back = false }: { title: string; back?: boolean }) {
+export function Header({ title, back = false, branded = false }: { title: string; back?: boolean; branded?: boolean }) {
   const router = useRouter();
   return (
     <View style={styles.row}>
       {back && <IconButton icon={ArrowLeft} label="Go back" onPress={() => router.canGoBack() ? router.back() : router.replace('/')} />}
-      <AppText variant="title" accessibilityRole="header" style={styles.title}>{title}</AppText>
+      <AppText variant="title" accessibilityRole="header" accessibilityLabel={title} style={styles.title}>{branded ? <><AppText variant="title" tone="primary">moe</AppText>math<AppText variant="title" tone="primary">.</AppText></> : title}</AppText>
       {!back && <IconButton icon={Settings} label="Settings" onPress={() => router.push('/settings')} />}
     </View>
   );
