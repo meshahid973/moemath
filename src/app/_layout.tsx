@@ -6,6 +6,8 @@ import { useFonts } from 'expo-font';
 import { NunitoSans_400Regular, NunitoSans_600SemiBold, NunitoSans_700Bold } from '@expo-google-fonts/nunito-sans';
 import { ThemeProvider, useTheme } from '@/theme/provider';
 
+import { CompanionSettingsProvider } from '@/features/companion/CompanionSettings';
+
 const fonts = { NunitoSans_400Regular, NunitoSans_600SemiBold, NunitoSans_700Bold };
 
 function Navigation() {
@@ -29,5 +31,5 @@ function Navigation() {
 export default function RootLayout() {
   const [loaded, error] = useFonts(fonts);
   if (!loaded && !error) return null;
-  return <ThemeProvider><Navigation /></ThemeProvider>;
+  return <ThemeProvider><CompanionSettingsProvider><Navigation /></CompanionSettingsProvider></ThemeProvider>;
 }

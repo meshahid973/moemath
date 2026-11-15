@@ -14,21 +14,29 @@ const choices = [
 
 type Props = { value: PracticeOperation; onChange: (value: PracticeOperation) => void };
 
-export function OperationPicker({ value, onChange }: Props) {
+export function QuickOperations({ onChange }: Pick<Props, 'onChange'>) {
+  return <OperationGrid onChange={onChange} />;
+}
+
+export function OperationPicker(props: Props) {
+  return <OperationGrid {...props} />;
+}
+
+function OperationGrid({ value, onChange }: { value?: PracticeOperation; onChange: Props['onChange'] }) {
   const { colors } = useTheme();
   const { width, fontScale } = useWindowDimensions();
   const singleColumn = width < 350 || fontScale > 1.3;
 
   return (
-    <View style={styles.grid} accessibilityRole="radiogroup">
-      {choices.map((choice) => {
+    <View style={styles.grid} accessibilityRole={value === undefined ? undefined : 'radiogroup'}>
+      {choices.filter((choice) => value !== undefined || choice.value !== 'mixed').map((choice) => {
         const selected = choice.value === value;
         return (
           <View key={choice.value} style={choice.value === 'mixed' || singleColumn ? styles.full : styles.half}>
             <Pressable
-              accessibilityRole="radio"
+              accessibilityRole={value === undefined ? 'button' : 'radio'}
               accessibilityLabel={choice.label}
-              accessibilityState={{ checked: selected }}
+              accessibilityState={value === undefined ? undefined : { checked: selected }}
               onPress={() => onChange(choice.value)}
               style={({ pressed }) => [
                 styles.tile,
@@ -41,9 +49,9 @@ export function OperationPicker({ value, onChange }: Props) {
               <View style={[styles.rail, { backgroundColor: choice.color }]} />
               <AppText accessibilityElementsHidden importantForAccessibility="no" style={styles.mark}>{choice.mark}</AppText>
               <AppText variant="label" style={styles.name}>{choice.label}</AppText>
-              <View style={[styles.selection, { borderColor: selected ? colors.primary : colors.muted }]}>
+              {value !== undefined && <View style={[styles.selection, { borderColor: selected ? colors.primary : colors.muted }]}>
                 {selected && <View style={[styles.dot, { backgroundColor: colors.primary }]} />}
-              </View>
+              </View>}
             </Pressable>
           </View>
         );

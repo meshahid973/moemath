@@ -8,6 +8,9 @@ import { summarizeAttempts } from '@/engine/scoring';
 import type { SessionAttempt } from '@/engine/session/session';
 import { useTheme } from '@/theme/provider';
 import { spacing } from '@/theme/tokens';
+import { CompanionPortrait, hasCompanion } from '@/features/companion/CompanionPortrait';
+import { useCompanionSettings } from '@/features/companion/CompanionSettings';
+import { resultExpression } from '@/features/companion/expressions';
 import { equation } from './QuestionStage';
 import { formatTime } from './SessionTimer';
 
@@ -15,6 +18,7 @@ type Props = { attempts: readonly SessionAttempt[]; onRetry: () => void; onDone:
 
 export function SessionResults({ attempts, onRetry, onDone }: Props) {
   const { colors } = useTheme();
+  const { showCompanion } = useCompanionSettings();
   const score = summarizeAttempts(attempts);
   const mistakes = attempts.filter((attempt) => attempt.expected !== attempt.submitted);
 
@@ -25,8 +29,13 @@ export function SessionResults({ attempts, onRetry, onDone }: Props) {
         <AppText variant="title" accessibilityRole="header" style={styles.headerTitle}>Results</AppText>
       </View>
       <Surface style={[styles.result, { backgroundColor: colors.tint }]}>
-        <AppText variant="caption" tone="muted">Correct answers</AppText>
-        <AppText variant="title" tone="primary" style={styles.score}>{score.correct}/{score.total}</AppText>
+        <View style={styles.summary}>
+          <View style={styles.scoreGroup}>
+            <AppText variant="caption" tone="muted">Correct answers</AppText>
+            <AppText variant="title" tone="primary" style={styles.score}>{score.correct}/{score.total}</AppText>
+          </View>
+          {showCompanion && hasCompanion && <CompanionPortrait expression={resultExpression(score.correct, score.total)} size={116} />}
+        </View>
         <View style={styles.metrics}>
           <Metric label="Accuracy" value={Math.round(score.accuracy * 100) + '%'} />
           <Metric label="Avg. time" value={score.averageMs === null ? '0s' : (score.averageMs / 1000).toFixed(1) + 's'} />
@@ -71,6 +80,8 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   headerTitle: { flex: 1 },
   result: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
+  summary: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: spacing.md },
+  scoreGroup: { alignItems: 'center' },
   score: { fontSize: 56, fontVariant: ['tabular-nums'] },
   metrics: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: spacing.md, width: '100%', marginTop: spacing.md },
   metric: { flexGrow: 1, flexBasis: 78, alignItems: 'center', gap: spacing.xs },

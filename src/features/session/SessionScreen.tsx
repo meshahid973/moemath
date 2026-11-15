@@ -14,6 +14,9 @@ import { Keypad, type Key } from './Keypad';
 import { QuestionStage } from './QuestionStage';
 import { SessionProgress } from './SessionProgress';
 import { SessionResults } from './SessionResults';
+import { CompanionPortrait, hasCompanion } from '@/features/companion/CompanionPortrait';
+import { useCompanionSettings } from '@/features/companion/CompanionSettings';
+import { useAnswerHaptics } from './useAnswerHaptics';
 import { SessionTimer } from './SessionTimer';
 
 export function SessionScreen({ options }: { options: SessionOptions }) {
@@ -22,6 +25,9 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
   const index = state.attempts.length;
   const question = state.questions[index];
   const total = state.questions.length;
+  const { showCompanion } = useCompanionSettings();
+  const previous = state.attempts[index - 1];
+  useAnswerHaptics(previous);
 
   const leave = useCallback(() => {
     if (router.canGoBack()) router.back();
@@ -92,10 +98,15 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
         </View>
         <SessionProgress total={total} completed={index} />
         <View style={styles.paused}>
+          {showCompanion && hasCompanion && <CompanionPortrait expression="sleepy" size={108} />}
           <AppText variant="title">Paused</AppText>
           <SessionTimer activeSince={null} elapsedBefore={state.elapsedBefore} />
         </View>
         <Button label="Resume" onPress={resume} />
+        <Button label="Restart" variant="secondary" onPress={() => Alert.alert('Restart practice?', 'Your current answers will be discarded.', [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Restart', onPress: retry },
+        ])} />
         <Button label="End practice" variant="secondary" onPress={confirmExit} />
       </Screen>
     );
@@ -114,7 +125,7 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
       <View style={styles.clock}>
         <SessionTimer activeSince={state.activeSince} elapsedBefore={state.elapsedBefore} />
       </View>
-      <QuestionStage question={question} input={state.input} previous={state.attempts[index - 1]} />
+      <QuestionStage question={question} input={state.input} previous={previous} />
       <Keypad onKey={onKey} canSubmit={state.phase === 'active' && state.input.length > 0} />
     </Screen>
   );
