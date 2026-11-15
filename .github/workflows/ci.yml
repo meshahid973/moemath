@@ -21,19 +21,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
-      - name: Save initial lockfile
-        if: always() && hashFiles('package-lock.json') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: npm-lockfile
-          path: package-lock.json
+      - run: npm ci
       - run: npm run check
       - run: npx expo install --check
       - run: npx expo-doctor
