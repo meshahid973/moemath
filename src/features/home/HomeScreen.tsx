@@ -9,7 +9,7 @@ import { SectionTitle } from '@/components/ui/SectionTitle';
 import { Surface } from '@/components/ui/Surface';
 import { useTheme } from '@/theme/provider';
 import { spacing } from '@/theme/tokens';
-import { useAdaptive } from '@/features/adaptive/AdaptiveProvider';
+import { useAdaptiveAvailability } from '@/features/adaptive/AdaptiveProvider';
 import { sessionParams } from '@/engine/session/options';
 import { CompanionPortrait } from '@/features/companion/CompanionPortrait';
 import { useCompanionSettings } from '@/features/companion/CompanionSettings';
@@ -20,7 +20,7 @@ export function HomeScreen() {
   const { colors } = useTheme();
   const { width, fontScale } = useWindowDimensions();
   const { showCompanion } = useCompanionSettings();
-  const { ready, error } = useAdaptive();
+  const adaptive = useAdaptiveAvailability();
   const horizontal = width >= 360 && fontScale <= 1.2;
 
   return (
@@ -32,17 +32,17 @@ export function HomeScreen() {
           <View style={styles.copy}>
             <AppText variant="caption" style={styles.eyebrow}>DAILY PRACTICE</AppText>
             <AppText variant="heading" style={styles.title}>{showCompanion ? 'Ready to practice?' : 'Start your session'}</AppText>
-            <AppText variant="caption">{ready && !error ? '10 personalized questions' : '10 questions'}</AppText>
+            <AppText variant="caption">{adaptive ? '10 personalized questions' : '10 questions'}</AppText>
           </View>
           {showCompanion && <View pointerEvents="none" style={styles.portrait}>
             <CompanionPortrait expression="neutral" size={horizontal ? 152 : 128} />
           </View>}
         </View>
-        <Button label="Start practice" arrow onPress={() => router.navigate({ pathname: '/session', params: sessionParams('mixed', 1, ready && !error) })} />
+        <Button label="Start practice" arrow onPress={() => router.navigate({ pathname: '/session', params: sessionParams('mixed', 1, adaptive) })} />
       </Surface>
       <View style={styles.quick}>
         <SectionTitle title="Quick practice" />
-        <QuickOperations onChange={(operation) => router.navigate({ pathname: '/session', params: sessionParams(operation, 1, ready && !error) })} />
+        <QuickOperations onChange={(operation) => router.navigate({ pathname: '/session', params: sessionParams(operation, 1, adaptive) })} />
       </View>
     </Screen>
   );

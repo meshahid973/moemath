@@ -93,3 +93,14 @@ test('generated session IDs round trip through route params', () => {
   assert.equal(options.adaptive, true);
   assert.equal(readSessionOptions({ id: 'invalid' }).id, undefined);
 });
+
+
+test('stale callbacks from a restarted session cannot enter or submit answers', () => {
+  let state = start();
+  const old = state.generation;
+  state = sessionReducer(state, { type: 'restart', options, now: 200 });
+  assert.equal(state.generation, old + 1);
+  assert.equal(sessionReducer(state, { type: 'digit', digit: '7', index: 0, generation: old }), state);
+  state = enter(state, 1);
+  assert.equal(sessionReducer(state, { type: 'submit', index: 0, now: 300, generation: old }), state);
+});

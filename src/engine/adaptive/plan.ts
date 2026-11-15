@@ -6,7 +6,8 @@ import { accuracy, type Profile } from './profile.ts';
 export function adaptiveQuestions(profile: Profile, operation: PracticeOperation, seed: number, now: number): readonly Question[] {
   const random = createRandom(seed);
   const pool = operation === 'mixed' ? [...operations] : [operation];
-  const weakest = [...pool].sort((a, b) => (accuracy(profile.skills[a]) ?? 0.75) - (accuracy(profile.skills[b]) ?? 0.75) || profile.skills[a].seen - profile.skills[b].seen);
+  const evidence = new Map(pool.map(op => [op, accuracy(profile.skills[op]) ?? 0.75]));
+  const weakest = [...pool].sort((a, b) => evidence.get(a)! - evidence.get(b)! || profile.skills[a].seen - profile.skills[b].seen);
   const seen = new Set<string>();
   const questions: Question[] = [];
   const add = (q: Question) => { if (!seen.has(q.key)) { seen.add(q.key); questions.push(q); } };

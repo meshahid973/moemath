@@ -9,6 +9,7 @@ export type SessionAttempt = Attempt & Readonly<{
 
 export type Session = Readonly<{
   id?: string;
+  generation: number;
   phase: 'ready' | 'active' | 'paused' | 'completed';
   questions: readonly Question[];
   attempts: readonly SessionAttempt[];
@@ -21,9 +22,9 @@ export type Session = Readonly<{
 
 export type SessionAction =
   | { type: 'start' | 'pause' | 'resume'; now: number }
-  | { type: 'digit'; digit: string; index: number }
-  | { type: 'backspace'; index: number }
-  | { type: 'submit'; index: number; now: number }
+  | { type: 'digit'; digit: string; index: number; generation?: number }
+  | { type: 'backspace'; index: number; generation?: number }
+  | { type: 'submit'; index: number; generation?: number; now: number }
   | { type: 'restart'; options: SessionOptions; now: number };
 
 const MAX_INPUT_LENGTH = 5;
@@ -31,6 +32,7 @@ const MAX_INPUT_LENGTH = 5;
 export function createSession(options: SessionOptions): Session {
   return {
     id: options.id,
+    generation: 0,
     phase: 'ready',
     questions: options.planned ?? generateQuestions(options),
     attempts: [],
@@ -49,7 +51,7 @@ export function elapsedAt(state: Pick<Session, 'activeSince' | 'elapsedBefore'>,
 export function sessionReducer(state: Session, action: SessionAction): Session {
   switch (action.type) {
     case 'restart':
-      return { ...createSession(action.options), phase: 'active', activeSince: action.now };
+      return { ...createSession(action.options), phase: 'active', activeSince: action.now, generation: state.generation + 1 };
     case 'start':
       return state.phase === 'ready' ? { ...state, phase: 'active', activeSince: action.now } : state;
     case 'pause':
@@ -67,7 +69,7 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
 
   // Ignore callbacks from an older question or a paused session.
   const index = state.attempts.length;
-  if (state.phase !== 'active' || action.index !== index) return state;
+  if (state.phase !== 'active' || action.index !== index || (action.generation !== undefined && action.generation !== state.generation)) return state;
 
   if (action.type === 'digit') {
     if (!/^\d$/.test(action.digit) || state.input.length >= MAX_INPUT_LENGTH) return state;

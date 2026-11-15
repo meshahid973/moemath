@@ -25,7 +25,7 @@ import { SessionTimer } from './SessionTimer';
 
 export function SessionScreen({ options }: { options: SessionOptions }) {
   const router = useRouter();
-  const { profile, record, ready, error } = useAdaptive();
+  const { profile, record, ready, error, pending } = useAdaptive();
   const [state, dispatch] = useReducer(sessionReducer, options, initial => createSession({ ...initial, planned: initial.adaptive && ready && !error ? adaptiveQuestions(profile, initial.operation, initial.seed ?? 0, Number(initial.id?.split(':')[0]) || 0) : undefined }));
   const recorded = useRef<readonly unknown[] | undefined>(undefined);
   useEffect(() => {
@@ -91,16 +91,17 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
     return () => subscription.remove();
   }, [state.phase, confirmExit, leave, pause]);
 
+  const generation = state.generation;
   const onKey = useCallback((key: Key) => {
-    if (key === 'submit') dispatch({ type: 'submit', index, now: performance.now() });
-    else if (key === 'delete') dispatch({ type: 'backspace', index });
-    else dispatch({ type: 'digit', digit: key, index });
-  }, [index]);
+    if (key === 'submit') dispatch({ type: 'submit', index, generation, now: performance.now() });
+    else if (key === 'delete') dispatch({ type: 'backspace', index, generation });
+    else dispatch({ type: 'digit', digit: key, index, generation });
+  }, [index, generation]);
 
   const audio = soundEffects && <AnswerSounds attempt={previous} paused={state.phase === 'paused'} />;
 
   if (state.phase === 'completed') {
-    return <>{audio}<Screen full><SessionResults attempts={state.attempts} onRetry={retry} onDone={leave} /></Screen></>;
+    return <>{audio}<Screen full><SessionResults attempts={state.attempts} onRetry={retry} onDone={leave} saving={pending} /></Screen></>;
   }
 
   if (state.phase === 'paused') {

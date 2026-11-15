@@ -22,7 +22,10 @@ export function emptyProfile(): Profile {
 }
 
 export function accuracy(skill: Skill): number | null {
-  return skill.recent.length ? skill.recent.filter(x => x.correct).length / skill.recent.length : null;
+  if (!skill.recent.length) return null;
+  let correct = 0;
+  for (const observation of skill.recent) if (observation.correct) correct++;
+  return correct / skill.recent.length;
 }
 
 function median(values: number[]): number {
