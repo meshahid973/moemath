@@ -7,6 +7,7 @@ import { Screen } from '@/components/ui/Screen';
 import { Surface } from '@/components/ui/Surface';
 import { useTheme } from '@/theme/provider';
 import { spacing } from '@/theme/tokens';
+import { sessionParams } from '@/engine/session/options';
 import { PracticeArtwork } from './PracticeArtwork';
 
 export function HomeScreen() {
@@ -24,7 +25,7 @@ export function HomeScreen() {
           <AppText variant="heading" style={styles.title}>Daily practice</AppText>
           <AppText tone="muted">10 questions</AppText>
         </View>
-        <Button label="Choose practice" onPress={() => router.navigate('/practice')} />
+        <Button label="Start practice" onPress={() => router.navigate({ pathname: '/session', params: sessionParams('mixed', 1) })} />
       </Surface>
     </Screen>
   );
