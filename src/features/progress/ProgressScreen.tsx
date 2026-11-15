@@ -1,20 +1,73 @@
+import { useCallback, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
+import { Button } from '@/components/ui/Button';
 import { Header } from '@/components/ui/Header';
 import { Screen } from '@/components/ui/Screen';
 import { SectionTitle } from '@/components/ui/SectionTitle';
+import { SegmentedChoice } from '@/components/ui/SegmentedChoice';
 import { SkillLevels } from '@/features/adaptive/SkillLevels';
 import { Surface } from '@/components/ui/Surface';
+import { dailyTotals } from '@/database/history';
+import { aggregate, type DailyTotals, type Period } from '@/engine/progress/metrics';
+import { spacing } from '@/theme/tokens';
+import { ProgressChart } from './ProgressChart';
+import { useAdaptive } from '@/features/adaptive/AdaptiveProvider';
+
+const periods = [{ value: 1, label: 'Today' }, { value: 7, label: '7 days' }, { value: 30, label: '30 days' }] as const;
+const metrics = [{ value: 'activity', label: 'Activity' }, { value: 'accuracy', label: 'Accuracy' }, { value: 'speed', label: 'Speed' }] as const;
 
 export function ProgressScreen() {
+  const router = useRouter();
+  const { profile } = useAdaptive();
+  const [period, setPeriod] = useState<Period>(7);
+  const [metric, setMetric] = useState<'activity' | 'accuracy' | 'speed'>('activity');
+  const [data, setData] = useState<{ period: Period; rows: DailyTotals[] } | null>(null);
+  const [error, setError] = useState(false);
+  const [retry, setRetry] = useState(0);
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    void dailyTotals(period).then(rows => {
+      if (active) { setData({ period, rows }); setError(false); }
+    }, () => { if (active) setError(true); });
+    return () => { active = false; };
+  }, [period, retry, profile]));
+  const rows = data?.period === period ? data.rows : undefined;
+  const totals = rows ? aggregate(rows) : null;
+
   return (
     <Screen>
       <Header title="Progress" />
+      <SegmentedChoice options={periods} value={period} onChange={setPeriod} />
+      <Surface>
+        {error ? <>
+          <AppText tone="muted">Could not load statistics.</AppText>
+          <Button label="Retry" variant="secondary" onPress={() => setRetry(x => x + 1)} />
+        </> : !totals ? <AppText tone="muted">Loading progress...</AppText> : <>
+          <View style={styles.grid}>
+            <Metric label="Answered" value={String(totals.total)} />
+            <Metric label="Accuracy" value={totals.accuracy === null ? '—' : Math.round(totals.accuracy * 100) + '%'} />
+            <Metric label="Avg. response" value={totals.averageMs === null ? '—' : (totals.averageMs / 1000).toFixed(1) + 's'} />
+            <Metric label="Sessions" value={String(totals.sessions)} />
+          </View>
+          {totals.total > 0 && rows ? <>
+            <SegmentedChoice options={metrics} value={metric} onChange={setMetric} />
+            <ProgressChart key={period + ':' + metric} rows={rows} metric={metric} />
+          </> : <AppText tone="muted">Complete a practice session to see your activity.</AppText>}
+        </>}
+      </Surface>
       <SectionTitle title="Your skills" />
       <SkillLevels />
-      <Surface>
-        <AppText variant="heading">Session history</AppText>
-        <AppText tone="muted">Full session history comes later.</AppText>
-      </Surface>
+      <Button label="Session history" arrow variant="secondary" onPress={() => router.push('/history')} />
+      <Button label="Review mistakes" arrow variant="secondary" onPress={() => router.push('/review')} />
     </Screen>
   );
 }
+function Metric({ label, value }: { label: string; value: string }) {
+  return <View style={styles.metric}><AppText variant="heading" tone="primary">{value}</AppText><AppText variant="caption" tone="muted">{label}</AppText></View>;
+}
+const styles = StyleSheet.create({
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
+  metric: { flexBasis: '40%', flexGrow: 1, gap: spacing.xs },
+});
