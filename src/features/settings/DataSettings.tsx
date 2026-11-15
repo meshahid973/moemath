@@ -31,7 +31,7 @@ export function DataSettings() {
   return <View style={styles.group}>
     <SectionTitle title="Local data" />
     <Button label={busy ? 'Working...' : 'Export data'} variant="secondary" disabled={busy || pending || error} onPress={() => { void exportData(); }} />
-    <Button label="Reset practice data" variant="secondary" disabled={busy || pending || error} onPress={() => Alert.alert('Reset practice data?', 'This permanently deletes saved history, skill levels and mistake reviews. Your appearance and sound settings will stay.', [
+    <Button label="Reset practice data" variant="secondary" disabled={busy || pending} onPress={() => Alert.alert('Reset practice data?', 'This permanently deletes saved history, skill levels and mistake reviews. Your appearance and sound settings will stay.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Reset', style: 'destructive', onPress: () => { void resetData(); } },
     ])} />

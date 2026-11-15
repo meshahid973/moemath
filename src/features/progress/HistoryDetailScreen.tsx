@@ -13,11 +13,12 @@ export function HistoryDetailScreen() {
   const { id } = useLocalSearchParams<{id: string}>();
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
-  const [detail, setDetail] = useState<SessionDetail | null | undefined>(undefined);
+  const [loaded, setDetail] = useState<{ data: SessionDetail | null; retry: number } | undefined>(undefined);
+  const detail = loaded?.retry === retry ? loaded.data : undefined;
   const { colors } = useTheme();
   useFocusEffect(useCallback(() => {
     let active = true;
-    void sessionDetail(typeof id === 'string' ? id : '').then(row => { if (active) { setDetail(row); setError(false); } }, () => { if (active) setError(true); });
+    void sessionDetail(typeof id === 'string' ? id : '').then(row => { if (active) { setDetail({ data: row, retry }); setError(false); } }, () => { if (active) setError(true); });
     return () => { active = false; };
   }, [id, retry]));
   return <Screen full>

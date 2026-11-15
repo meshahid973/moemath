@@ -21,19 +21,20 @@ const metrics = [{ value: 'activity', label: 'Activity' }, { value: 'accuracy', 
 export function ProgressScreen() {
   const router = useRouter();
   const { profile } = useAdaptive();
+  const revision = Object.values(profile.skills).reduce((sum, skill) => sum + skill.seen, 0);
   const [period, setPeriod] = useState<Period>(7);
   const [metric, setMetric] = useState<'activity' | 'accuracy' | 'speed'>('activity');
-  const [data, setData] = useState<{ period: Period; rows: DailyTotals[] } | null>(null);
+  const [data, setData] = useState<{ period: Period; revision: number; retry: number; rows: DailyTotals[] } | null>(null);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
   useFocusEffect(useCallback(() => {
     let active = true;
     void dailyTotals(period).then(rows => {
-      if (active) { setData({ period, rows }); setError(false); }
+      if (active) { setData({ period, revision, retry, rows }); setError(false); }
     }, () => { if (active) setError(true); });
     return () => { active = false; };
-  }, [period, retry, profile]));
-  const rows = data?.period === period ? data.rows : undefined;
+  }, [period, retry, revision]));
+  const rows = data?.period === period && data.revision === revision && data.retry === retry ? data.rows : undefined;
   const totals = rows ? aggregate(rows) : null;
 
   return (
