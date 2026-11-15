@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Text, StyleSheet, type TextProps } from 'react-native';
 import { useTheme } from '@/theme/provider';
 
@@ -22,7 +23,7 @@ type Props = TextProps & {
   tone?: 'text' | 'muted' | 'primary' | 'onPrimary';
 };
 
-export function AppText({ variant = 'body', tone = 'text', style, ...props }: Props) {
+export const AppText = memo(function AppText({ variant = 'body', tone = 'text', style, ...props }: Props) {
   const { colors } = useTheme();
   return <Text {...props} style={[variants[variant], { color: colors[tone], fontFamily: families[variant], fontWeight: 'normal' }, style]} />;
-}
+});

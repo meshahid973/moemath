@@ -18,11 +18,13 @@ export const CompanionPortrait = memo(function CompanionPortrait({ expression, s
       source={source}
       style={{ width: size, height: size }}
       contentFit="contain"
-      transition={reducedMotion ? 0 : 150}
+      transition={reducedMotion ? 0 : { duration: 150, skipOnCacheHit: 'all' }}
+      allowDownscaling
+      enforceEarlyResizing
       accessible={false}
       accessibilityElementsHidden
       importantForAccessibility="no"
-      cachePolicy="memory"
+      cachePolicy={size <= 80 ? "memory" : "none"}
     />
   );
 });

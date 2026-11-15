@@ -3,7 +3,7 @@ import { SectionTitle } from '@/components/ui/SectionTitle';
 import { ChoiceRow } from '@/components/ui/ChoiceRow';
 import { Header } from '@/components/ui/Header';
 import { Screen } from '@/components/ui/Screen';
-import { useTheme } from '@/theme/provider';
+import { useAppearance } from '@/theme/provider';
 import { SwitchRow } from '@/components/ui/SwitchRow';
 import { hasCompanion } from '@/features/companion/CompanionPortrait';
 import { useCompanionSettings } from '@/features/companion/CompanionSettings';
@@ -16,7 +16,7 @@ const modes: { value: ThemeMode; label: string }[] = [
 ];
 
 export function SettingsScreen() {
-  const { mode, setMode } = useTheme();
+  const { mode, setMode } = useAppearance();
   const { showCompanion, setShowCompanion, haptics, setHaptics, soundEffects, setSoundEffects } = useCompanionSettings();
   return (
     <Screen full>

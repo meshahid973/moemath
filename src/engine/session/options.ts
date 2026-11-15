@@ -23,7 +23,7 @@ export function readSessionOptions(params: SessionParams): SessionOptions {
     operation,
     difficulty,
     ...(params.adaptive === '1' ? { adaptive: true } : {}),
-    ...(typeof params.id === 'string' && /^\\d{1,16}:\\d{1,10}$/.test(params.id) ? { id: params.id } : {}),
+    ...(typeof params.id === 'string' && /^\d{1,16}:\d{1,10}$/.test(params.id) ? { id: params.id } : {}),
     count: DEFAULT_QUESTIONS,
     seed: Number.isSafeInteger(seed) && seed >= 0 && seed <= 0xffffffff ? seed : 0,
   };

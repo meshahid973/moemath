@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createSession, elapsedAt, sessionReducer } from '../src/engine/session/session.ts';
-import { readSessionOptions } from '../src/engine/session/options.ts';
+import { readSessionOptions, sessionParams } from '../src/engine/session/options.ts';
 
 const options = { operation: 'mixed', difficulty: 1, count: 10, seed: 10 };
 const start = () => sessionReducer(createSession(options), { type: 'start', now: 100 });
@@ -83,4 +83,13 @@ test('restarting clears attempts, input and timestamps', () => {
 test('route values are validated before generation', () => {
   assert.deepEqual(readSessionOptions({ operation: 'division', difficulty: '6', seed: '40' }), { operation: 'division', difficulty: 6, count: 10, seed: 40 });
   assert.deepEqual(readSessionOptions({ operation: 'bad', difficulty: '99', seed: '-1' }), { operation: 'mixed', difficulty: 1, count: 10, seed: 0 });
+});
+
+
+test('generated session IDs round trip through route params', () => {
+  const params = sessionParams('mixed', 3, true);
+  const options = readSessionOptions(params);
+  assert.equal(options.id, params.id);
+  assert.equal(options.adaptive, true);
+  assert.equal(readSessionOptions({ id: 'invalid' }).id, undefined);
 });

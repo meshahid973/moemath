@@ -16,7 +16,7 @@ import { CompanionPortrait } from '@/features/companion/CompanionPortrait';
 import { useCompanionSettings } from '@/features/companion/CompanionSettings';
 import { resultExpression } from '@/features/companion/expressions';
 import { formatEquation } from '@/engine/arithmetic/format';
-import { formatTime } from './SessionTimer';
+import { formatTime } from '@/engine/session/clock';
 
 const enter = FadeInDown.duration(220).reduceMotion(ReduceMotion.System);
 type Props = { attempts: readonly SessionAttempt[]; onRetry: () => void; onDone: () => void };

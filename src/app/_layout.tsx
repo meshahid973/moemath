@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { enableFreeze } from 'react-native-screens';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
@@ -9,6 +10,8 @@ import { ThemeProvider, useTheme } from '@/theme/provider';
 import { AdaptiveProvider } from '@/features/adaptive/AdaptiveProvider';
 import { CompanionSettingsProvider } from '@/features/companion/CompanionSettings';
 
+enableFreeze(true);
+
 const fonts = { NunitoSans_400Regular, NunitoSans_600SemiBold, NunitoSans_700Bold };
 
 function Navigation() {
@@ -17,10 +20,12 @@ function Navigation() {
     void SystemUI.setBackgroundColorAsync(colors.background).catch(() => {});
   }, [colors.background]);
 
+  const screenOptions = useMemo(() => ({ headerShown: false, freezeOnBlur: true, contentStyle: { backgroundColor: colors.background } }), [colors.background]);
+
   return (
     <>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+      <Stack screenOptions={screenOptions}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="settings" />
         <Stack.Screen name="session" options={{ gestureEnabled: false }} />
