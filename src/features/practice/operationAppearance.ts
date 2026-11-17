@@ -1,7 +1,7 @@
 import { symbols, type PracticeOperation } from '../../engine/arithmetic/types.ts';
 
 export const operationChoices = [
-  { value: 'mixed', label: 'Mixed', mark: '±' },
+  { value: 'mixed', label: 'Mixed', mark: 'Â±' },
   { value: 'addition', label: 'Addition', mark: symbols.addition },
   { value: 'subtraction', label: 'Subtraction', mark: symbols.subtraction },
   { value: 'multiplication', label: 'Multiplication', mark: symbols.multiplication },
@@ -9,6 +9,6 @@ export const operationChoices = [
 ] as const;
 
 export const operationColors: Record<'light' | 'dark', Record<PracticeOperation, string>> = {
-  light: { mixed: '#7755B0', addition: '#16715F', subtraction: '#A63760', multiplication: '#7755B0', division: '#286A99' },
-  dark: { mixed: '#B69BE8', addition: '#83D4C2', subtraction: '#F3A3BD', multiplication: '#B69BE8', division: '#91C8ED' },
+  light: { mixed: '#693B82', addition: '#17634F', subtraction: '#A12D58', multiplication: '#693B82', division: '#245B81' },
+  dark: { mixed: '#D8B5F2', addition: '#83D4C2', subtraction: '#F3A3BD', multiplication: '#D8B5F2', division: '#91C8ED' },
 };

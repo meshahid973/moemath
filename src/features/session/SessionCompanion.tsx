@@ -10,7 +10,7 @@ import { spacing } from '@/theme/tokens';
 export const SessionCompanion = memo(function SessionCompanion({ previous }: { previous?: SessionAttempt }) {
   const { showCompanion } = useCompanionSettings();
   const { height, width, fontScale } = useWindowDimensions();
-  const visible = showCompanion && height >= 740 && width >= 350 && fontScale <= 1.2;
+  const visible = showCompanion && height >= 680 && width >= 350 && fontScale <= 1.2;
   const [settled, setSettled] = useState<SessionAttempt>();
 
   useEffect(() => {
@@ -27,13 +27,13 @@ export const SessionCompanion = memo(function SessionCompanion({ previous }: { p
 
   return (
     <View style={styles.row}>
-      <CompanionPortrait expression={expression} size={76} />
+      <CompanionPortrait expression={expression} size={64} />
       <View style={styles.dialogue}><CompanionDialogue message={message} /></View>
     </View>
   );
 });
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm, height: 76 },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm, height: 64 },
   dialogue: { flexShrink: 1, width: 156 },
 });

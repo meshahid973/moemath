@@ -47,7 +47,7 @@ export const AnswerFeedback = memo(function AnswerFeedback({ attempt }: { attemp
 });
 
 const styles = StyleSheet.create({
-  slot: { minHeight: 40, justifyContent: 'center', alignItems: 'center' },
+  slot: { minHeight: 32, justifyContent: 'center', alignItems: 'center' },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
   text: { flexShrink: 1, textAlign: 'center' },
 });

@@ -7,6 +7,7 @@ import { AppText } from '@/components/ui/AppText';
 import { Header } from '@/components/ui/Header';
 import { Screen } from '@/components/ui/Screen';
 import { Surface } from '@/components/ui/Surface';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { historyPage, type HistoryRow } from '@/database/history';
 import { formatTime } from '@/engine/session/clock';
@@ -30,9 +31,9 @@ export function HistoryScreen() {
 
   return <Screen full>
     <Header title="Session history" back />
-    {error ? <Button label="Retry" onPress={() => setRetry(x => x + 1)} /> : !page || page.retry !== retry ? <AppText tone="muted">Loading history...</AppText> : !page.rows.length ? <AppText tone="muted">No saved sessions.</AppText> : <>
-      <Surface>
-        {page.rows.map(row => <Pressable key={row.id} accessibilityRole="button" onPress={() => router.push({ pathname: '/history-detail', params: { id: row.id } })} style={({ pressed }) => [styles.row, { backgroundColor: pressed ? colors.tint : 'transparent' }]} >
+    {error ? <Button label="Retry" onPress={() => setRetry(x => x + 1)} /> : !page || page.retry !== retry ? <AppText tone="muted">Loading history...</AppText> : !page.rows.length ? <EmptyState title="Your story starts here." message="Completed sessions will appear here, answer by answer." action="Start practice" onPress={() => router.push('/practice')} /> : <>
+      <Surface style={{ gap: 0, paddingVertical: 0 }}>
+        {page.rows.map(row => <Pressable key={row.id} accessibilityRole="button" onPress={() => router.push({ pathname: '/history-detail', params: { id: row.id } })} style={({ pressed }) => [styles.row, { backgroundColor: pressed ? colors.tint : 'transparent', borderBottomColor: colors.border }]} >
           <View style={styles.copy}>
             <AppText variant="label">{new Date(row.completedAt).toLocaleDateString()}</AppText>
             <AppText variant="caption" tone="muted">{row.correct}/{row.total} correct · {formatTime(row.elapsedMs)}</AppText>
@@ -49,7 +50,7 @@ export function HistoryScreen() {
   </Screen>;
 }
 const styles = StyleSheet.create({
-  row: { minHeight: 56, borderRadius: 8, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xs },
+  row: { minHeight: 80, borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.md },
   copy: { flex: 1, minWidth: 100, gap: spacing.xs },
   page: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
 });

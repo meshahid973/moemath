@@ -4,10 +4,8 @@ import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { AppText } from '@/components/ui/AppText';
 import type { Question } from '@/engine/arithmetic/types';
 import { formatEquation } from '@/engine/arithmetic/format';
-import { useCompanionSettings } from '@/features/companion/CompanionSettings';
 import type { SessionAttempt } from '@/engine/session/session';
 import { useTheme } from '@/theme/provider';
-import { PanelMotif } from '@/components/ui/PanelMotif';
 import { SessionCompanion } from './SessionCompanion';
 import { AnswerFeedback } from './AnswerFeedback';
 import { radius, spacing } from '@/theme/tokens';
@@ -16,7 +14,7 @@ const questionAnimation = FadeIn.duration(100).reduceMotion(ReduceMotion.System)
 const Equation = memo(function Equation({ question }: { question: Question }) {
   return (
     <Animated.View key={question.key} entering={questionAnimation}>
-      <AppText variant="title" style={styles.equation} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>{formatEquation(question)}</AppText>
+      <AppText variant="equation" style={styles.equation} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>{formatEquation(question)}</AppText>
     </Animated.View>
   );
 });
@@ -27,14 +25,12 @@ export const QuestionStage = memo(function QuestionStage({ question, input, prev
   previous?: SessionAttempt;
 }) {
   const { colors } = useTheme();
-  const { showCompanion } = useCompanionSettings();
   return (
     <View style={[styles.panel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      {showCompanion && <PanelMotif subtle />}
       <SessionCompanion previous={previous} />
       <Equation question={question} />
-      <View style={[styles.answer, { backgroundColor: colors.tint }]}>
-        <AppText variant="title" tone="primary" style={styles.answerText} accessibilityLabel={input ? 'Answer ' + input : 'Answer empty'}>{input || '?'}</AppText>
+      <View style={[styles.answer, { backgroundColor: colors.tint, borderBottomColor: colors.primary }]}>
+        <AppText variant="equation" tone="primary" style={styles.answerText} accessibilityLabel={input ? 'Answer ' + input : 'Answer empty'}>{input || '?'}</AppText>
       </View>
       <AnswerFeedback attempt={previous} />
     </View>
@@ -42,8 +38,8 @@ export const QuestionStage = memo(function QuestionStage({ question, input, prev
 });
 
 const styles = StyleSheet.create({
-  panel: { flexGrow: 1, justifyContent: 'center', gap: spacing.md, padding: spacing.lg, borderWidth: 1, borderRadius: radius.panel, overflow: 'hidden' },
-  equation: { fontSize: 46, textAlign: 'center', fontVariant: ['tabular-nums'] },
-  answer: { minHeight: 64, borderRadius: radius.control, justifyContent: 'center', padding: spacing.sm },
-  answerText: { fontSize: 36, textAlign: 'center', fontVariant: ['tabular-nums'] },
+  panel: { flexGrow: 1, justifyContent: 'center', gap: spacing.sm, paddingVertical: spacing.md, paddingHorizontal: spacing.lg, borderWidth: 0, borderRadius: radius.panel, overflow: 'hidden' },
+  equation: { textAlign: 'center', fontVariant: ['tabular-nums'] },
+  answer: { minHeight: 64, marginHorizontal: spacing.lg, borderRadius: radius.control, borderBottomWidth: 2, justifyContent: 'center', padding: spacing.sm },
+  answerText: { fontSize: 38, textAlign: 'center', fontVariant: ['tabular-nums'] },
 });

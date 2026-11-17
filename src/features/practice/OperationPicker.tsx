@@ -1,20 +1,16 @@
 import { useReducedMotion } from 'react-native-reanimated';
 import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { ArrowUpRight, Check } from 'lucide-react-native';
 import { AppText } from '@/components/ui/AppText';
 import type { PracticeOperation } from '@/engine/arithmetic/types';
 import { useTheme } from '@/theme/provider';
 import { radius, spacing } from '@/theme/tokens';
 import { operationChoices, operationColors } from './operationAppearance';
+import { OperationMark } from './OperationMark';
 
 type Props = { value: PracticeOperation; onChange: (value: PracticeOperation) => void };
-
-export function QuickOperations({ onChange }: Pick<Props, 'onChange'>) {
-  return <OperationGrid onChange={onChange} />;
-}
-
-export function OperationPicker(props: Props) {
-  return <OperationGrid {...props} />;
-}
+export function QuickOperations({ onChange }: Pick<Props, 'onChange'>) { return <OperationGrid onChange={onChange} />; }
+export function OperationPicker(props: Props) { return <OperationGrid {...props} />; }
 
 function OperationGrid({ value, onChange }: { value?: PracticeOperation; onChange: Props['onChange'] }) {
   const reducedMotion = useReducedMotion();
@@ -22,53 +18,41 @@ function OperationGrid({ value, onChange }: { value?: PracticeOperation; onChang
   const { width, fontScale } = useWindowDimensions();
   const singleColumn = width < 350 || fontScale > 1.3;
   const quick = value === undefined;
-
-  return (
-    <View style={styles.grid} accessibilityRole={quick ? undefined : 'radiogroup'}>
-      {operationChoices.filter((choice) => !quick || choice.value !== 'mixed').map((choice) => {
-        const selected = choice.value === value;
-        const accent = operationColors[scheme][choice.value];
-        return (
-          <View key={choice.value} style={choice.value === 'mixed' || singleColumn ? styles.full : styles.half}>
-            <Pressable
-              accessibilityRole={quick ? 'button' : 'radio'}
-              accessibilityLabel={choice.label}
-              accessibilityState={quick ? undefined : { checked: selected }}
-              onPress={() => onChange(choice.value)}
-              style={({ pressed }) => [
-                styles.tile, quick && styles.quickTile,
-                {
-                  borderColor: selected ? accent : colors.border,
-                  backgroundColor: selected || pressed ? colors.tint : colors.surface,
-                  transform: [{ scale: pressed && !reducedMotion ? 0.98 : 1 }],
-                },
-              ]}
-            >
-              <View pointerEvents="none" style={[styles.corner, { backgroundColor: accent + '12' }]} />
-              <AppText accessibilityElementsHidden importantForAccessibility="no" style={[styles.mark, { color: accent }]}>{choice.mark}</AppText>
-              <AppText variant="label" style={styles.name}>{choice.label}</AppText>
-              {!quick && <View style={[styles.selection, { borderColor: selected ? accent : colors.muted }]}>
-                {selected && <View style={[styles.dot, { backgroundColor: accent }]} />}
-              </View>}
-              {quick && <View style={[styles.rail, { backgroundColor: accent }]} />}
-            </Pressable>
-          </View>
-        );
-      })}
-    </View>
-  );
+  return <View style={styles.grid} accessibilityRole={quick ? undefined : 'radiogroup'}>
+    {operationChoices.filter(choice => !quick || choice.value !== 'mixed').map(choice => {
+      const selected = choice.value === value;
+      const accent = operationColors[scheme][choice.value];
+      return <Pressable key={choice.value}
+        accessibilityRole={quick ? 'button' : 'radio'} accessibilityLabel={choice.label}
+        accessibilityState={quick ? undefined : { checked: selected }}
+        onPress={() => onChange(choice.value)}
+        style={({ pressed }) => [styles.tile, quick && styles.quickTile, !quick && choice.value !== 'mixed' && !singleColumn && styles.operationTile, choice.value === 'mixed' || singleColumn ? styles.full : styles.half, {
+          borderColor: selected ? colors.primary : colors.border,
+          ...(quick ? { borderBottomColor: accent + '55' } : {}),
+          backgroundColor: selected || pressed ? colors.tint : quick ? 'transparent' : colors.surface,
+          transform: [{ translateY: pressed && !reducedMotion ? 2 : 0 }],
+        }]}>
+        <View style={[styles.symbol, { backgroundColor: quick ? 'transparent' : accent + '12' }]}><OperationMark operation={choice.value} color={accent} size={quick ? 34 : 26} /></View>
+        <View style={[styles.copy, (quick || (!singleColumn && choice.value !== 'mixed')) && styles.quickCopy]}><AppText variant="label" style={styles.name}>{choice.label}</AppText>
+          {choice.value === 'mixed' && <AppText variant="caption" tone="muted">All four operations</AppText>}
+        </View>
+        {quick ? <ArrowUpRight style={styles.quickArrow} size={17} color={colors.muted} /> : <View style={[styles.selection, choice.value !== 'mixed' && !singleColumn && styles.cornerSelection, { borderColor: selected ? colors.primary : colors.border, backgroundColor: selected ? colors.primary : 'transparent' }]}>{selected && <Check size={12} strokeWidth={2.5} color={colors.onPrimary} />}</View>}
+      </Pressable>;
+    })}
+  </View>;
 }
-
 const styles = StyleSheet.create({
-  grid: { flexDirection: 'row', flexWrap: 'wrap', margin: -spacing.xs },
-  full: { width: '100%', padding: spacing.xs },
-  half: { width: '50%', padding: spacing.xs },
-  tile: { minHeight: 68, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, borderWidth: 1, borderRadius: radius.control, overflow: 'hidden' },
-  quickTile: { minHeight: 102, alignItems: 'flex-start', flexDirection: 'column', gap: spacing.xs },
-  corner: { position: 'absolute', width: 90, height: 90, right: -35, top: -44, transform: [{ rotate: '45deg' }] },
-  rail: { width: 24, height: 3, borderRadius: 2, marginTop: spacing.xs },
-  mark: { fontSize: 30, lineHeight: 36, fontVariant: ['tabular-nums'] },
-  name: { flexShrink: 1, fontSize: 14 },
-  selection: { marginLeft: 'auto', width: 16, height: 16, borderWidth: 1.5, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  dot: { width: 8, height: 8, borderRadius: 4 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  full: { flexBasis: '100%' },
+  half: { flexBasis: '47%', flexGrow: 1 },
+  tile: { minHeight: 76, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, borderWidth: 1, borderRadius: radius.control, overflow: 'hidden' },
+  quickTile: { minHeight: 88, alignItems: 'flex-start', flexDirection: 'column', gap: spacing.xs, borderWidth: 0, borderBottomWidth: 1, borderRadius: 0, paddingVertical: spacing.sm, paddingHorizontal: spacing.xs },
+  operationTile: { minHeight: 88, flexDirection: 'column', alignItems: 'flex-start', gap: spacing.xs },
+  cornerSelection: { position: 'absolute', top: 14, right: 12 },
+  quickCopy: { flex: 0 },
+  quickArrow: { position: 'absolute', top: 14, right: 12 },
+  symbol: { width: 36, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 3 },
+  copy: { flex: 1, gap: 2 },
+  name: { fontSize: 13, lineHeight: 19 },
+  selection: { width: 18, height: 18, borderWidth: 1, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
 });

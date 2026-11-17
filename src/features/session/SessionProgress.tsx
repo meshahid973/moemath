@@ -21,5 +21,5 @@ export const SessionProgress = memo(function SessionProgress({ total, completed 
 
 const styles = StyleSheet.create({
   track: { flexDirection: 'row', gap: spacing.xs },
-  segment: { flex: 1, height: 6, borderRadius: 3, overflow: 'hidden' },
+  segment: { flex: 1, height: 4, borderRadius: 1, overflow: 'hidden' },
 });
