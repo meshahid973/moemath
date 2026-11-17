@@ -27,7 +27,7 @@ export function DifficultyPicker({ value, onChange }: Props) {
               transform: [{ scale: pressed && !reducedMotion ? 0.98 : 1 }],
             }]}
           >
-            <AppText variant="caption" tone={selected ? 'onPrimary' : 'muted'} style={{ fontVariant: ['tabular-nums'] }}>0{level}</AppText>
+            <AppText variant="caption" tone={selected ? 'onPrimary' : 'muted'} style={{ fontVariant: ['tabular-nums'] }}>{level}</AppText>
             <AppText tone={selected ? 'onPrimary' : 'text'} variant="label">{difficultyNames[level]}</AppText>
           </Pressable>
         );

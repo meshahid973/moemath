@@ -1,3 +1,7 @@
+import { StyleSheet, View } from 'react-native';
+import { useTheme } from '@/theme/provider';
+import { spacing } from '@/theme/tokens';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { useCallback, useState } from 'react';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
@@ -11,6 +15,7 @@ import { formatEquation } from '@/engine/arithmetic/format';
 
 export function ReviewScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const { profile, ready, error, pending } = useAdaptive();
   const [now, setNow] = useState(() => Date.now());
   useFocusEffect(useCallback(() => {
@@ -25,9 +30,12 @@ export function ReviewScreen() {
       <AppText tone="muted">Due questions return first. Early practice does not clear a scheduled review.</AppText>
       <Button label="Start review" arrow disabled={!ready || error || pending || !items.length} onPress={() => router.push({ pathname: '/session', params: { ...sessionParams('mixed', 1), review: '1' } })} />
     </Surface>
-    {items.map(item => <Surface key={item.question.key}>
+    {ready && !items.length && <EmptyState title="A clean slate." message="Mistakes from future sessions will return here for another try." action="Go to practice" onPress={() => router.push('/practice')} />}
+    <View>
+    {items.map(item => <View key={item.question.key} style={{ paddingVertical: spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border, gap: spacing.xs }}>
       <AppText variant="heading">{formatEquation(item.question)}</AppText>
       <AppText variant="caption" tone="muted">{item.due <= now ? 'Due for review' : 'Early review available'}</AppText>
-    </Surface>)}
+    </View>)}
+    </View>
   </Screen>;
 }

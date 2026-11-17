@@ -8,6 +8,7 @@ import { Screen } from '@/components/ui/Screen';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { SegmentedChoice } from '@/components/ui/SegmentedChoice';
 import { SkillLevels } from '@/features/adaptive/SkillLevels';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Surface } from '@/components/ui/Surface';
 import { dailyTotals } from '@/database/history';
 import { aggregate, type DailyTotals, type Period } from '@/engine/progress/metrics';
@@ -66,7 +67,7 @@ export function ProgressScreen() {
           {totals.total > 0 && rows ? <>
             <SegmentedChoice options={metrics} value={metric} onChange={setMetric} />
             <ProgressChart key={period + ':' + metric} rows={rows} metric={metric} />
-          </> : <AppText tone="muted">Complete a practice session to see your activity.</AppText>}
+          </> : <EmptyState title="Every answer adds up." message="Complete a session to start your practice record." action="Start practice" onPress={() => router.push('/practice')} />}
         </>}
       </Surface>
       <SectionTitle title="Your skills" />
@@ -77,9 +78,9 @@ export function ProgressScreen() {
   );
 }
 function Metric({ label, value }: { label: string; value: string }) {
-  return <View style={styles.metric}><AppText variant="heading" tone="primary">{value}</AppText><AppText variant="caption" tone="muted">{label}</AppText></View>;
+  return <View style={styles.metric}><AppText variant="display" tone="primary">{value}</AppText><AppText variant="caption" tone="muted">{label}</AppText></View>;
 }
 const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
-  metric: { flexBasis: '40%', flexGrow: 1, gap: spacing.xs },
+  metric: { flexBasis: '40%', flexGrow: 1, gap: 2, paddingVertical: spacing.sm },
 });

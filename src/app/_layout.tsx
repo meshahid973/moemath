@@ -4,7 +4,10 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { useFonts } from 'expo-font';
-import { NunitoSans_400Regular, NunitoSans_600SemiBold, NunitoSans_700Bold } from '@expo-google-fonts/nunito-sans';
+import { NunitoSans_400Regular } from '@expo-google-fonts/nunito-sans/400Regular';
+import { NunitoSans_600SemiBold } from '@expo-google-fonts/nunito-sans/600SemiBold';
+import { NunitoSans_700Bold } from '@expo-google-fonts/nunito-sans/700Bold';
+import { NunitoSans_900Black_Italic } from '@expo-google-fonts/nunito-sans/900Black_Italic';
 import { ThemeProvider, useTheme } from '@/theme/provider';
 
 import { AdaptiveProvider } from '@/features/adaptive/AdaptiveProvider';
@@ -12,7 +15,7 @@ import { PreferencesProvider, usePreferencesReady } from '@/features/settings/Pr
 
 enableFreeze(true);
 
-const fonts = { NunitoSans_400Regular, NunitoSans_600SemiBold, NunitoSans_700Bold };
+const fonts = { NunitoSans_400Regular, NunitoSans_600SemiBold, NunitoSans_700Bold, NunitoSans_900Black_Italic };
 
 function Navigation() {
   const { colors, scheme } = useTheme();

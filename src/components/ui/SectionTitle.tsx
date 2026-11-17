@@ -14,6 +14,6 @@ export function SectionTitle({ title }: { title: string }) {
 }
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  accent: { width: 4, height: 20, borderRadius: 2 },
+  accent: { width: 10, height: 3, transform: [{ skewX: '-24deg' }] },
   title: { flex: 1 },
 });

@@ -16,7 +16,7 @@ import { spacing } from '@/theme/tokens';
 import { CompanionPortrait } from '@/features/companion/CompanionPortrait';
 import { useCompanionSettings } from '@/features/companion/CompanionSettings';
 import { resultExpression } from '@/features/companion/expressions';
-import { formatEquation } from '@/engine/arithmetic/format';
+import { AttemptRow } from '@/features/progress/AttemptRow';
 import { formatTime } from '@/engine/session/clock';
 
 const enter = FadeInDown.duration(220).reduceMotion(ReduceMotion.System);
@@ -38,15 +38,15 @@ export const SessionResults = memo(function SessionResults({ attempts, onRetry, 
         <AppText variant="title" accessibilityRole="header" style={styles.headerTitle}>Results</AppText>
       </View>
       <Animated.View entering={enter}>
-        <Surface style={[styles.result, { backgroundColor: colors.tint }]}>
+        <Surface style={[styles.result, { backgroundColor: colors.stage }]}>
           <PanelMotif />
           <View style={[styles.summary, horizontal && styles.horizontal]}>
             <View style={styles.scoreGroup}>
-              <AppText variant="caption" style={styles.eyebrow}>CORRECT ANSWERS</AppText>
-              <AppText variant="title" tone="primary" style={styles.score} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65}>{score.correct}/{score.total}</AppText>
-              <AppText variant="label">{perfect ? 'Amazing!' : score.accuracy >= 0.8 ? 'Nice work!' : 'Keep practicing!'}</AppText>
+              <AppText variant="heading">{perfect ? 'Beautifully done.' : 'Session complete.'}</AppText>
+              <AppText variant="score" tone="primary" style={styles.score} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65}>{score.correct}/{score.total}</AppText>
+              <AppText variant="caption">{perfect ? 'Amazing!' : score.accuracy >= 0.8 ? 'Nice work!' : 'Keep practicing!'}</AppText>
             </View>
-            {showCompanion && <CompanionPortrait expression={resultExpression(score.correct, score.total)} size={horizontal ? 148 : 128} />}
+            {showCompanion && <CompanionPortrait expression={resultExpression(score.correct, score.total)} size={horizontal ? 156 : 128} />}
           </View>
           <View accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: score.total, now: score.correct }} style={[styles.bar, { backgroundColor: colors.border }]}>
             <View style={[styles.fill, { width: `${Math.round(score.accuracy * 100)}%`, backgroundColor: colors.primary }]} />
@@ -67,15 +67,7 @@ export const SessionResults = memo(function SessionResults({ attempts, onRetry, 
         <View style={styles.review}>
           <SectionTitle title="Review mistakes" />
           <Surface style={styles.reviewPanel}>
-            {mistakes.map((attempt, index) => (
-              <View key={attempt.question.key} style={[styles.reviewRow, index > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }]}>
-                <AppText variant="label">{formatEquation(attempt.question)}</AppText>
-                <View style={styles.answers}>
-                  <AppText variant="caption" tone="muted">Your answer: {attempt.submitted ?? 'Skipped'}</AppText>
-                  <AppText variant="label" style={{ color: colors.success }}>Correct: {attempt.expected}</AppText>
-                </View>
-              </View>
-            ))}
+            {mistakes.map(attempt => <AttemptRow key={attempt.question.key} attempt={attempt} />)}
           </Surface>
         </View>
       )}
@@ -98,12 +90,11 @@ function Metric({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   headerTitle: { flex: 1 },
-  result: { overflow: 'hidden', gap: spacing.lg },
+  result: { overflow: 'hidden', gap: spacing.lg, borderTopWidth: 0, borderRadius: 12, padding: spacing.lg },
   summary: { alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
   horizontal: { flexDirection: 'row' },
   scoreGroup: { flexShrink: 1, flexGrow: 1, gap: spacing.xs },
-  eyebrow: { fontSize: 11, letterSpacing: 1.1 },
-  score: { fontSize: 56, fontVariant: ['tabular-nums'] },
+  score: { fontSize: 60, fontVariant: ['tabular-nums'] },
   bar: { height: 6, borderRadius: 3, overflow: 'hidden' },
   fill: { height: '100%', borderRadius: 3 },
   metrics: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: spacing.sm },
@@ -112,7 +103,5 @@ const styles = StyleSheet.create({
   metricLabel: { textAlign: 'center' },
   review: { gap: spacing.sm },
   reviewPanel: { gap: 0 },
-  reviewRow: { gap: spacing.sm, paddingVertical: spacing.md },
-  answers: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
   perfect: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
 });

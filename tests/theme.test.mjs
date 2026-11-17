@@ -48,3 +48,12 @@ for (const [name, colors] of Object.entries(palettes)) {
     }
   });
 }
+
+for (const [name, colors] of Object.entries(palettes)) {
+  test(name + ' character stages keep content readable', () => {
+    for (const background of [colors.stage, colors.stageStrong, colors.ribbon]) {
+      assert.ok(contrast(colors.text, background) >= 4.5);
+    }
+    assert.ok(contrast(colors.primary, colors.stage) >= 4.5);
+  });
+}

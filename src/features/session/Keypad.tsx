@@ -60,6 +60,6 @@ export const Keypad = memo(function Keypad({ onKey, canSubmit }: Props) {
 const styles = StyleSheet.create({
   grid: { gap: spacing.sm },
   row: { flexDirection: 'row', gap: spacing.sm },
-  key: { flex: 1, borderWidth: 1, borderBottomWidth: 3, borderRadius: radius.control, alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.xs },
-  digit: { fontSize: 25, fontVariant: ['tabular-nums'] },
+  key: { flex: 1, borderWidth: 1, borderBottomWidth: 2, borderRadius: radius.control, alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.xs },
+  digit: { fontSize: 27, fontVariant: ['tabular-nums'] },
 });

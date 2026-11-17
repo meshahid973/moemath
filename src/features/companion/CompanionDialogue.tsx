@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { useTheme } from '@/theme/provider';
-import { radius, spacing } from '@/theme/tokens';
+import { spacing } from '@/theme/tokens';
 
 export function CompanionDialogue({ message }: { message: string }) {
   const { colors } = useTheme();
@@ -13,6 +13,6 @@ export function CompanionDialogue({ message }: { message: string }) {
 }
 
 const styles = StyleSheet.create({
-  bubble: { flexShrink: 1, borderWidth: 1, borderRadius: radius.control, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  bubble: { flexShrink: 1, borderBottomWidth: 1, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   message: { textAlign: 'center' },
 });

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { useTheme } from '@/theme/provider';
 import { spacing } from '@/theme/tokens';
 import { operationChoices, operationColors } from '@/features/practice/operationAppearance';
+import { OperationMark } from '@/features/practice/OperationMark';
 import { accuracy } from '@/engine/adaptive/profile';
 import { useAdaptive } from './AdaptiveProvider';
 
@@ -25,6 +26,7 @@ export function SkillLevels() {
         return (
           <View key={choice.value} style={styles.skill}>
             <View style={styles.row}>
+              <OperationMark operation={choice.value} color={operationColors[scheme][choice.value]} size={20} />
               <AppText variant="label" style={styles.label}>{choice.label}</AppText>
               <AppText variant="caption" tone="muted">Level {skill.level}/6</AppText>
             </View>
@@ -40,9 +42,9 @@ export function SkillLevels() {
 }
 
 const styles = StyleSheet.create({
-  skill: { gap: spacing.sm },
+  skill: { gap: spacing.sm, paddingVertical: spacing.sm },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   label: { flex: 1 },
   bar: { flexDirection: 'row', gap: spacing.xs },
-  segment: { flex: 1, height: 6, borderRadius: 3 },
+  segment: { flex: 1, height: 4, borderRadius: 1 },
 });
