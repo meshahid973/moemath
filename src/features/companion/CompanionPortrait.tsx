@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { useReducedMotion } from 'react-native-reanimated';
 import { portraitSources } from './portraitSources';
 import type { Expression } from './expressions';
+import { motion } from '@/theme/tokens';
 
 export const hasCompanion = portraitSources.neutral !== undefined;
 
@@ -18,7 +19,7 @@ export const CompanionPortrait = memo(function CompanionPortrait({ expression, s
       source={source}
       style={{ width: size, height: size }}
       contentFit="contain"
-      transition={reducedMotion ? 0 : { duration: 150, skipOnCacheHit: 'all' }}
+      transition={reducedMotion ? 0 : { duration: motion.portrait, skipOnCacheHit: 'all' }}
       allowDownscaling
       enforceEarlyResizing
       accessible={false}

@@ -1,6 +1,5 @@
 import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { AppText } from '@/components/ui/AppText';
 import type { Question } from '@/engine/arithmetic/types';
 import { formatEquation } from '@/engine/arithmetic/format';
@@ -10,12 +9,11 @@ import { SessionCompanion } from './SessionCompanion';
 import { AnswerFeedback } from './AnswerFeedback';
 import { radius, spacing } from '@/theme/tokens';
 
-const questionAnimation = FadeIn.duration(100).reduceMotion(ReduceMotion.System);
 const Equation = memo(function Equation({ question }: { question: Question }) {
   return (
-    <Animated.View key={question.key} entering={questionAnimation}>
+    <View>
       <AppText variant="equation" style={styles.equation} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>{formatEquation(question)}</AppText>
-    </Animated.View>
+    </View>
   );
 });
 

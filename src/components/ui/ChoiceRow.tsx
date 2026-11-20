@@ -1,16 +1,16 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import { Check } from 'lucide-react-native';
 import { useTheme } from '@/theme/provider';
 import { size, spacing } from '@/theme/tokens';
 import { AppText } from './AppText';
 
-type Props = { label: string; selected: boolean; onPress: () => void };
+type Props = Omit<PressableProps, 'children' | 'style'> & { label: string; selected: boolean; style?: StyleProp<ViewStyle> };
 
-export function ChoiceRow({ label, selected, onPress }: Props) {
+export function ChoiceRow({ label, selected, disabled = false, style, accessibilityState, ...props }: Props) {
   const { colors } = useTheme();
   return (
-    <Pressable accessibilityRole="radio" accessibilityState={{ checked: selected }} onPress={onPress}
-      style={({ pressed }) => [styles.row, { backgroundColor: selected || pressed ? colors.tint : 'transparent', borderBottomColor: colors.border }]}>
+    <Pressable {...props} disabled={disabled} accessibilityRole="radio" accessibilityState={{ ...accessibilityState, checked: selected, disabled }}
+      style={({ pressed }) => [styles.row, { backgroundColor: pressed ? colors.pressed : selected ? colors.character : 'transparent', borderBottomColor: colors.border, opacity: disabled ? 0.5 : 1 }, style]}>
       <AppText variant="label" style={styles.label}>{label}</AppText>
       <View style={styles.indicator}>{selected && <Check size={20} color={colors.primary} />}</View>
     </Pressable>

@@ -5,7 +5,6 @@ import { ArrowLeft, CheckCircle2 } from 'lucide-react-native';
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
-import { PanelMotif } from '@/components/ui/PanelMotif';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { Surface } from '@/components/ui/Surface';
 import { SaveStatus } from '@/features/adaptive/SaveStatus';
@@ -39,7 +38,6 @@ export const SessionResults = memo(function SessionResults({ attempts, onRetry, 
       </View>
       <Animated.View entering={enter}>
         <Surface style={[styles.result, { backgroundColor: colors.stage }]}>
-          <PanelMotif />
           <View style={[styles.summary, horizontal && styles.horizontal]}>
             <View style={styles.scoreGroup}>
               <AppText variant="heading">{perfect ? 'Beautifully done.' : 'Session complete.'}</AppText>

@@ -4,7 +4,7 @@ import { useColorScheme } from 'react-native';
 import { palettes, resolveTheme, type Palette, type ThemeMode } from './tokens';
 
 type Appearance = { mode: ThemeMode; setMode: (mode: ThemeMode) => void };
-type Theme = { scheme: 'light' | 'dark'; colors: Palette };
+type Theme = { scheme: 'light' | 'dark'; colors: Palette; fontsReady: boolean };
 const ThemeContext = createContext<Theme | null>(null);
 const AppearanceContext = createContext<Appearance | null>(null);
 const themes = {
@@ -12,12 +12,13 @@ const themes = {
   dark: { scheme: 'dark', colors: palettes.dark },
 } as const;
 
-export function ThemeProvider({ children }: PropsWithChildren) {
+export function ThemeProvider({ children, fontsReady = true }: PropsWithChildren<{ fontsReady?: boolean }>) {
   const system = useColorScheme();
   const { mode, setPreference } = useStoredAppearance();
   const setMode = useCallback((value: ThemeMode) => setPreference('mode', value), [setPreference]);
   const appearance = useMemo(() => ({ mode, setMode }), [mode, setMode]);
-  const theme = themes[resolveTheme(mode, system)];
+  const base = themes[resolveTheme(mode, system)];
+  const theme = useMemo(() => ({ ...base, fontsReady }), [base, fontsReady]);
   return (
     <AppearanceContext.Provider value={appearance}>
       <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>

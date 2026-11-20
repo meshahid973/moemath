@@ -2,15 +2,15 @@ import { DataSettings } from './DataSettings';
 import { PreferencesStatus } from './PreferencesStatus';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
-import { CompanionPortrait, hasCompanion } from '@/features/companion/CompanionPortrait';
-import { PanelMotif } from '@/components/ui/PanelMotif';
-import { useTheme, useAppearance } from '@/theme/provider';
+import { hasCompanion } from '@/features/companion/CompanionPortrait';
+import { useAppearance } from '@/theme/provider';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { ChoiceRow } from '@/components/ui/ChoiceRow';
 import { Header } from '@/components/ui/Header';
 import { Screen } from '@/components/ui/Screen';
 import { SwitchRow } from '@/components/ui/SwitchRow';
 import { useCompanionSettings } from '@/features/companion/CompanionSettings';
+import { CompanionStage } from '@/features/companion/CompanionStage';
 import { spacing, type ThemeMode } from '@/theme/tokens';
 
 const modes: { value: ThemeMode; label: string }[] = [
@@ -20,17 +20,15 @@ const modes: { value: ThemeMode; label: string }[] = [
 ];
 
 export function SettingsScreen() {
-  const { colors } = useTheme();
   const { mode, setMode } = useAppearance();
   const { showCompanion, setShowCompanion, haptics, setHaptics, soundEffects, setSoundEffects } = useCompanionSettings();
   return (
     <Screen full>
       <Header title="Settings" back />
-      {showCompanion && <View style={[styles.companion, { backgroundColor: colors.tint }]}>
-        <PanelMotif subtle />
-        <View style={styles.companionCopy}><AppText variant="heading">Your study companion.</AppText><AppText variant="caption" tone="muted">A space that feels like you.</AppText></View>
-        <CompanionPortrait expression="happy" size={84} />
-      </View>}
+      {showCompanion && <CompanionStage expression="happy" placement="inline">
+        <AppText variant="heading">Your study companion.</AppText>
+        <AppText variant="caption" tone="muted">A space that feels like you.</AppText>
+      </CompanionStage>}
       <View style={styles.group} accessibilityRole="radiogroup">
         <SectionTitle title="Appearance" />
         {modes.map(({ value, label }) => <ChoiceRow key={value} label={label} selected={mode === value} onPress={() => setMode(value)} />)}
@@ -47,4 +45,4 @@ export function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({ group: { gap: spacing.sm }, companion: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.lg, paddingTop: spacing.md, overflow: 'hidden', borderRadius: 12 }, companionCopy: { flex: 1, gap: spacing.xs } });
+const styles = StyleSheet.create({ group: { gap: spacing.sm } });

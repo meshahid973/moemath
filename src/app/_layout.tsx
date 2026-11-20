@@ -4,18 +4,13 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { useFonts } from 'expo-font';
-import { NunitoSans_400Regular } from '@expo-google-fonts/nunito-sans/400Regular';
-import { NunitoSans_600SemiBold } from '@expo-google-fonts/nunito-sans/600SemiBold';
-import { NunitoSans_700Bold } from '@expo-google-fonts/nunito-sans/700Bold';
-import { NunitoSans_900Black_Italic } from '@expo-google-fonts/nunito-sans/900Black_Italic';
+import { fontAssets } from '@/theme/fonts';
 import { ThemeProvider, useTheme } from '@/theme/provider';
 
 import { AdaptiveProvider } from '@/features/adaptive/AdaptiveProvider';
 import { PreferencesProvider, usePreferencesReady } from '@/features/settings/PreferencesProvider';
 
 enableFreeze(true);
-
-const fonts = { NunitoSans_400Regular, NunitoSans_600SemiBold, NunitoSans_700Bold, NunitoSans_900Black_Italic };
 
 function Navigation() {
   const { colors, scheme } = useTheme();
@@ -40,13 +35,13 @@ function Navigation() {
   );
 }
 
-function ReadyApp() {
+function ReadyApp({ fontsReady }: { fontsReady: boolean }) {
   const ready = usePreferencesReady();
-  return ready ? <ThemeProvider><AdaptiveProvider><Navigation /></AdaptiveProvider></ThemeProvider> : null;
+  return ready ? <ThemeProvider fontsReady={fontsReady}><AdaptiveProvider><Navigation /></AdaptiveProvider></ThemeProvider> : null;
 }
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts(fonts);
+  const [loaded, error] = useFonts(fontAssets);
   if (!loaded && !error) return null;
-  return <PreferencesProvider><ReadyApp /></PreferencesProvider>;
+  return <PreferencesProvider><ReadyApp fontsReady={loaded} /></PreferencesProvider>;
 }
