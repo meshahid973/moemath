@@ -1,54 +1,55 @@
-export const spacing = { xs: 4, sm: 8, md: 12, lg: 16, screen: 24, xl: 24, xxl: 32 } as const;
-export const radius = { control: 8, panel: 12 } as const;
-export const size = { touch: 48, button: 56, content: 600, icon: 21 } as const;
+import type { TextStyle } from 'react-native';
 
+export const spacing = { xs: 4, sm: 8, md: 12, lg: 16, compact: 20, screen: 24, xl: 24, xxl: 32 } as const;
+export const radius = { control: 6, panel: 12 } as const;
+export const size = { touch: 48, button: 56, content: 600, icon: 21, brandMark: 24 } as const;
+export const layout = {
+  compact: 360, rail: 768, characterMargin: 128, characterMinWidth: 300,
+  characterPortrait: 224, inlinePortrait: 88, largeText: 1.3,
+} as const;
+export const fontFamily = { regular: 'MPlus1p_400Regular', bold: 'MPlus1p_700Bold', extraBold: 'MPlus1p_800ExtraBold' } as const;
+
+const numerals = { fontVariant: ['tabular-nums'] } satisfies TextStyle;
 export const typography = {
-  display: { fontSize: 32, lineHeight: 36, letterSpacing: -0.8, fontFamily: 'NunitoSans_900Black_Italic' },
-  title: { fontSize: 28, lineHeight: 34, letterSpacing: -0.7, fontFamily: 'NunitoSans_700Bold' },
-  heading: { fontSize: 21, lineHeight: 27, letterSpacing: -0.4, fontFamily: 'NunitoSans_700Bold' },
-  body: { fontSize: 16, lineHeight: 24, fontFamily: 'NunitoSans_400Regular' },
-  label: { fontSize: 15, lineHeight: 21, fontFamily: 'NunitoSans_700Bold' },
-  caption: { fontSize: 13, lineHeight: 19, fontFamily: 'NunitoSans_600SemiBold' },
-  equation: { fontSize: 48, lineHeight: 62, letterSpacing: -1, fontFamily: 'NunitoSans_700Bold' },
-  score: { fontSize: 64, lineHeight: 76, letterSpacing: -2, fontFamily: 'NunitoSans_900Black_Italic' },
-} as const;
-export const motion = { press: 80, release: 140, state: 180, result: 240 } as const;
+  brand: { fontSize: 28, lineHeight: 36, fontFamily: fontFamily.extraBold },
+  hero: { fontSize: 30, lineHeight: 36, fontFamily: fontFamily.bold },
+  // Compatibility role; heavy type is reserved for the wordmark and result numeral.
+  display: { fontSize: 30, lineHeight: 36, fontFamily: fontFamily.bold },
+  title: { fontSize: 24, lineHeight: 30, fontFamily: fontFamily.bold },
+  heading: { fontSize: 20, lineHeight: 28, fontFamily: fontFamily.bold },
+  body: { fontSize: 16, lineHeight: 24, fontFamily: fontFamily.regular },
+  label: { fontSize: 15, lineHeight: 21, fontFamily: fontFamily.bold },
+  caption: { fontSize: 13, lineHeight: 19, fontFamily: fontFamily.regular },
+  metadata: { fontSize: 13, lineHeight: 19, fontFamily: fontFamily.regular, ...numerals },
+  equation: { fontSize: 48, lineHeight: 64, fontFamily: fontFamily.bold, ...numerals },
+  answer: { fontSize: 44, lineHeight: 58, fontFamily: fontFamily.bold, ...numerals },
+  score: { fontSize: 72, lineHeight: 88, fontFamily: fontFamily.extraBold, ...numerals },
+  denominator: { fontSize: 24, lineHeight: 32, fontFamily: fontFamily.bold, ...numerals },
+} as const satisfies Record<string, TextStyle>;
+export const motion = { press: 80, release: 120, state: 180, portrait: 150, pressedScale: 0.985 } as const;
 
-export const palettes = {
-  light: {
-    background: '#F7F3FA',
-    surface: '#FFFCFF',
-    primary: '#693B82',
-    onPrimary: '#FFFFFF',
-    tint: '#EEE3F6',
-    accent: '#B14673',
-    text: '#302238',
-    muted: '#6A5775',
-    border: '#D8CBDF',
-    success: '#17634F',
-    danger: '#A12D58',
-    stage: '#E5D4F0',
-    stageStrong: '#D1B6E4',
-    ribbon: '#E8B5CC',
-  },
-  dark: {
-    background: '#16121D',
-    surface: '#211B2B',
-    primary: '#D8B5F2',
-    onPrimary: '#30203E',
-    tint: '#30263F',
-    accent: '#EDA9C9',
-    text: '#F6EFFA',
-    muted: '#C3B1CE',
-    border: '#4A3B59',
-    success: '#8BD9BA',
-    danger: '#FFA9C5',
-    stage: '#362343',
-    stageStrong: '#503260',
-    ribbon: '#75415F',
-  },
+const light = {
+  background: '#FFF8FC', surface: '#F6F1FA', text: '#292D5C', muted: '#646078',
+  primary: '#3E429C', onPrimary: '#FFFFFF', character: '#E4DFF8', border: '#D3CBE1',
+  math: '#3E429C', onMath: '#FFFFFF', success: '#1D6B58', correction: '#C02B66',
+  // Error text also appears at normal sizes on the lavender character/selected surface.
+  danger: '#B1245C', controlBorder: '#777087', pressed: '#DCD6F2',
+  disabled: '#E8E2EE', onDisabled: '#777087',
+} as const;
+const dark = {
+  background: '#000000', surface: '#13121B', text: '#F1EFFF', muted: '#BDB5CF',
+  primary: '#C3C4FF', onPrimary: '#242342', character: '#24203B', border: '#39334E',
+  math: '#191C3B', onMath: '#F1EFFF', success: '#8CD8BE', correction: '#FFA2C5',
+  danger: '#FFA2C5', controlBorder: '#8C849F', pressed: '#302B4A',
+  disabled: '#292634', onDisabled: '#8C849F',
 } as const;
 
+// Compatibility boundary for screens whose compositions change in later phases.
+function withLegacyRoles<T extends typeof light | typeof dark>(colors: T) {
+  return { ...colors, tint: colors.character, accent: colors.correction,
+    stage: colors.character, stageStrong: colors.character, ribbon: colors.character };
+}
+export const palettes = { light: withLegacyRoles(light), dark: withLegacyRoles(dark) } as const;
 export type Palette = (typeof palettes)[keyof typeof palettes];
 export type ThemeMode = 'system' | 'light' | 'dark';
 

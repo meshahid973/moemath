@@ -1,9 +1,9 @@
 import { StyleSheet, View } from 'react-native';
-import { Settings, ArrowLeft } from 'lucide-react-native';
+import { Settings, ArrowLeft, Plus } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { AppText } from './AppText';
 import { IconButton } from './IconButton';
-import { spacing } from '@/theme/tokens';
+import { size, spacing } from '@/theme/tokens';
 import { useTheme } from '@/theme/provider';
 
 export function Header({ title, back = false, branded = false }: { title: string; back?: boolean; branded?: boolean }) {
@@ -13,8 +13,8 @@ export function Header({ title, back = false, branded = false }: { title: string
     <View style={styles.row}>
       {back && <IconButton icon={ArrowLeft} label="Go back" onPress={() => router.canGoBack() ? router.back() : router.replace('/')} />}
       <View style={styles.title}>
-        <AppText variant={branded ? 'display' : 'title'} accessibilityRole="header" accessibilityLabel={title}>{branded ? <>moe<AppText variant="display" tone="primary">math.</AppText></> : title}</AppText>
-        {branded && <View style={[styles.signature, { backgroundColor: colors.accent }]} />}
+        {branded && <View style={[styles.mark, { backgroundColor: colors.primary }]} accessible={false}><Plus size={18} color={colors.onPrimary} strokeWidth={2.5} /></View>}
+        <AppText variant={branded ? 'brand' : 'title'} accessibilityRole="header" accessibilityLabel={title} style={styles.label}>{branded ? 'MoeMath' : title}</AppText>
       </View>
       {!back && <IconButton icon={Settings} label="Settings" onPress={() => router.push('/settings')} />}
     </View>
@@ -23,6 +23,7 @@ export function Header({ title, back = false, branded = false }: { title: string
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  title: { flex: 1 },
-  signature: { width: 27, height: 3, marginTop: 3, transform: [{ skewX: '-24deg' }] },
+  title: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  label: { flexShrink: 1 },
+  mark: { width: size.brandMark, height: size.brandMark, alignItems: 'center', justifyContent: 'center' },
 });

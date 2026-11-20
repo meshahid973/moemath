@@ -5,10 +5,18 @@ import { typography } from '@/theme/tokens';
 
 type Props = TextProps & {
   variant?: keyof typeof typography;
-  tone?: 'text' | 'muted' | 'primary' | 'onPrimary';
+  tone?: 'text' | 'muted' | 'primary' | 'onPrimary' | 'onMath' | 'success' | 'danger';
 };
 
 export const AppText = memo(function AppText({ variant = 'body', tone = 'text', style, ...props }: Props) {
-  const { colors } = useTheme();
-  return <Text {...props} style={[typography[variant], { color: colors[tone], fontWeight: 'normal' }, style]} />;
+  const { colors, fontsReady } = useTheme();
+  return <Text {...props} style={[
+    typography[variant],
+    { color: colors[tone] },
+    style,
+    !fontsReady && {
+      fontFamily: undefined,
+      fontWeight: typography[variant].fontFamily === typography.body.fontFamily ? '400' : '700',
+    },
+  ]} />;
 });

@@ -1,19 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import type { TextProps } from 'react-native';
 import { AppText } from './AppText';
-import { useTheme } from '@/theme/provider';
-import { spacing } from '@/theme/tokens';
 
-export function SectionTitle({ title }: { title: string }) {
-  const { colors } = useTheme();
-  return (
-    <View style={styles.row}>
-      <View style={[styles.accent, { backgroundColor: colors.primary }]} />
-      <AppText variant="heading" accessibilityRole="header" style={styles.title}>{title}</AppText>
-    </View>
-  );
+export function SectionTitle({ title, style }: { title: string; style?: TextProps['style'] }) {
+  return <AppText variant="heading" accessibilityRole="header" style={style}>{title}</AppText>;
 }
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  accent: { width: 10, height: 3, transform: [{ skewX: '-24deg' }] },
-  title: { flex: 1 },
-});

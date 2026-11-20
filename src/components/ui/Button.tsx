@@ -1,39 +1,44 @@
 import { ArrowUpRight } from 'lucide-react-native';
-import { Pressable, StyleSheet, type PressableProps } from 'react-native';
-import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { ActivityIndicator, Pressable, StyleSheet, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
+import Animated, { useReducedMotion } from 'react-native-reanimated';
 import { useTheme } from '@/theme/provider';
 import { motion, radius, size, spacing } from '@/theme/tokens';
 import { AppText } from './AppText';
+import { pressTransition, pressedTransform } from './pressFeedback';
 
-type Props = Pick<PressableProps, 'onPress' | 'disabled' | 'testID'> & { label: string; variant?: 'primary' | 'secondary'; arrow?: boolean };
+type Props = Omit<PressableProps, 'children' | 'style'> & {
+  label: string; variant?: 'primary' | 'secondary'; arrow?: boolean;
+  loading?: boolean; style?: StyleProp<ViewStyle>;
+};
 
-export function Button({ label, disabled, variant = 'primary', arrow = false, ...props }: Props) {
+export function Button({ label, disabled = false, loading = false, variant = 'primary', arrow = false, style, accessibilityState, ...props }: Props) {
   const { colors } = useTheme();
-  const scale = useSharedValue(1);
-  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.get() }] }));
-
-  function animate(value: number, duration: number) {
-    scale.set(withTiming(value, { duration, reduceMotion: ReduceMotion.System }));
-  }
+  const reducedMotion = useReducedMotion();
+  const blocked = disabled || loading;
+  const foreground = blocked ? colors.onDisabled : variant === 'primary' ? colors.onPrimary : colors.primary;
 
   return (
-    <Animated.View style={pressStyle}>
-      <Pressable
-        {...props}
-        disabled={disabled}
-        accessibilityRole="button"
-        accessibilityState={{ disabled: !!disabled }}
-        onPressIn={() => animate(0.985, motion.press)}
-        onPressOut={() => animate(1, motion.release)}
-        style={[styles.button, { backgroundColor: variant === 'primary' ? colors.primary : colors.surface, borderColor: variant === 'primary' ? colors.primary : colors.border, opacity: disabled ? 0.5 : 1 }]}
-      >
-        <AppText variant="label" style={{ flexShrink: 1, flexGrow: arrow ? 1 : 0, textAlign: arrow ? 'left' : 'center' }} tone={variant === 'primary' ? 'onPrimary' : 'text'}>{label}</AppText>
-        {arrow && <ArrowUpRight size={22} color={variant === 'primary' ? colors.onPrimary : colors.primary} strokeWidth={1.8} />}
-      </Pressable>
-    </Animated.View>
+    <Pressable
+      {...props}
+      disabled={blocked}
+      accessibilityRole="button"
+      accessibilityLabel={props.accessibilityLabel ?? label}
+      accessibilityState={{ ...accessibilityState, disabled: blocked, busy: loading }}
+      pressRetentionOffset={spacing.lg}
+      style={style}
+    >
+      {({ pressed }) => <Animated.View style={[styles.button,
+        { backgroundColor: blocked ? colors.disabled : variant === 'primary' ? colors.primary : pressed ? colors.pressed : colors.surface,
+          borderColor: blocked ? colors.disabled : variant === 'primary' ? colors.primary : colors.controlBorder },
+        !reducedMotion && pressTransition, !reducedMotion && pressed && !blocked && pressedTransform,
+        { transitionDuration: pressed ? motion.press : motion.release, opacity: pressed && variant === 'primary' ? 0.88 : 1 }]}>
+        <AppText variant="label" style={{ flexShrink: 1, flexGrow: arrow ? 1 : 0, textAlign: arrow ? 'left' : 'center', color: foreground }}>{label}</AppText>
+        {loading ? <ActivityIndicator color={foreground} /> : arrow ? <ArrowUpRight size={size.icon} color={foreground} strokeWidth={1.8} /> : null}
+      </Animated.View>}
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  button: { minHeight: size.button, borderWidth: 1, paddingVertical: spacing.lg, paddingHorizontal: spacing.lg, borderRadius: radius.control, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: spacing.sm },
+  button: { minHeight: size.button, borderWidth: 1, paddingVertical: spacing.lg, paddingHorizontal: spacing.lg, borderRadius: radius.control, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: spacing.sm },
 });

@@ -1,19 +1,20 @@
-import { ScrollView, StyleSheet, View, type ViewProps } from 'react-native';
+import { ScrollView, StyleSheet, View, useWindowDimensions, type StyleProp, type ViewStyle, type ViewProps } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/provider';
-import { size, spacing } from '@/theme/tokens';
+import { layout, size, spacing } from '@/theme/tokens';
 
 const tabEdges: Edge[] = ['top', 'left', 'right'];
 const fullEdges: Edge[] = ['top', 'left', 'right', 'bottom'];
 
-type Props = Pick<ViewProps, 'children'> & { full?: boolean; fill?: boolean; compact?: boolean };
+type Props = Pick<ViewProps, 'children'> & { full?: boolean; fill?: boolean; compact?: boolean; style?: StyleProp<ViewStyle>; contentStyle?: StyleProp<ViewStyle> };
 
-export function Screen({ children, full = false, fill = false, compact = false }: Props) {
+export function Screen({ children, full = false, fill = false, compact = false, style, contentStyle }: Props) {
   const { colors } = useTheme();
+  const { width } = useWindowDimensions();
   return (
-    <SafeAreaView edges={full ? fullEdges : tabEdges} style={[styles.root, { backgroundColor: colors.background }]}>
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <View style={[styles.content, fill && styles.fill, compact && styles.compact]}>{children}</View>
+    <SafeAreaView edges={full ? fullEdges : tabEdges} style={[styles.root, { backgroundColor: colors.background }, style]}>
+      <ScrollView contentContainerStyle={[styles.scroll, { paddingHorizontal: width < layout.compact ? spacing.compact : spacing.screen }]} keyboardShouldPersistTaps="handled">
+        <View style={[styles.content, fill && styles.fill, compact && styles.compact, contentStyle]}>{children}</View>
       </ScrollView>
     </SafeAreaView>
   );
