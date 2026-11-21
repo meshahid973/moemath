@@ -3,7 +3,7 @@ import { ArrowUpRight, Check } from 'lucide-react-native';
 import { AppText } from '@/components/ui/AppText';
 import type { PracticeOperation } from '@/engine/arithmetic/types';
 import { useTheme } from '@/theme/provider';
-import { size, spacing } from '@/theme/tokens';
+import { spacing } from '@/theme/tokens';
 import { operationChoices } from './operationAppearance';
 import { OperationMark } from './OperationMark';
 
