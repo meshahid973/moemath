@@ -29,7 +29,10 @@ export const ProgressChart = memo(function ProgressChart({ rows, metric }: { row
   const [plotWidth, setPlotWidth] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   if (!rows.length) return null;
-  const index = Math.min(rows.length - 1, selected ?? rows.length - 1);
+  // Prefer the latest practiced day. The final day may be empty, which made
+  // the chart show "0" even when the period had activity.
+  const lastPracticed = rows.reduce((latest, row, i) => row.total > 0 ? i : latest, rows.length - 1);
+  const index = Math.min(rows.length - 1, selected ?? lastPracticed);
   const active = rows[index]!;
   const values = rows.map(row => value(row, metric));
   const max = metric === 'accuracy' ? 100 : Math.max(1, ...values.map(v => v ?? 0));
@@ -48,7 +51,7 @@ export const ProgressChart = memo(function ProgressChart({ rows, metric }: { row
   return (
     <View style={styles.chart}>
       <View style={styles.readout}>
-        <AppText variant="caption" tone="muted">{active.day}</AppText>
+        <AppText variant="caption" tone="muted">{new Date(active.day + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</AppText>
         <AppText variant="heading" tone="primary">{display(values[index] ?? null, metric)}</AppText>
       </View>
       <View

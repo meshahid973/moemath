@@ -3,20 +3,22 @@ import { ArrowUpRight, Check } from 'lucide-react-native';
 import { AppText } from '@/components/ui/AppText';
 import type { PracticeOperation } from '@/engine/arithmetic/types';
 import { useTheme } from '@/theme/provider';
-import { spacing } from '@/theme/tokens';
+import { layout, spacing } from '@/theme/tokens';
 import { operationChoices } from './operationAppearance';
 import { OperationMark } from './OperationMark';
 
 type Props = { value: PracticeOperation; onChange: (value: PracticeOperation) => void };
 
+// Home shortcuts are an open, two-column study index, not a stack of cards.
 export function QuickOperations({ onChange }: Pick<Props, 'onChange'>) {
   const { colors } = useTheme();
   const { width, fontScale } = useWindowDimensions();
-  const narrow = width < 350 || fontScale >= 1.35;
+  const narrow = width < 350 || fontScale >= layout.largeText;
+  const choices = operationChoices.filter(choice => choice.value !== 'mixed');
 
   return (
-    <View style={styles.quickGrid}>
-      {operationChoices.filter(choice => choice.value !== 'mixed').map(choice => (
+    <View style={[styles.quickGrid, { borderTopColor: colors.border }]}>
+      {choices.map((choice, index) => (
         <Pressable
           key={choice.value}
           accessibilityRole="button"
@@ -24,13 +26,18 @@ export function QuickOperations({ onChange }: Pick<Props, 'onChange'>) {
           accessibilityHint="Start a ten-question practice session"
           onPress={() => onChange(choice.value)}
           style={({ pressed }) => [
-            styles.quickTile, narrow ? styles.quickFull : styles.quickHalf,
-            { backgroundColor: pressed ? colors.pressed : colors.surface, borderColor: colors.border },
+            styles.quickItem, narrow ? styles.quickFull : styles.quickHalf,
+            !narrow && index % 2 === 0 && styles.quickLeft,
+            {
+              backgroundColor: pressed ? colors.pressed : 'transparent',
+              borderBottomColor: colors.border,
+              borderRightColor: colors.border,
+            },
           ]}
         >
           <View style={styles.quickTop}>
-            <OperationMark operation={choice.value} color={colors.primary} size={31} />
-            <ArrowUpRight size={18} color={colors.muted} strokeWidth={1.7} />
+            <OperationMark operation={choice.value} color={colors.primary} size={27} />
+            <ArrowUpRight size={16} color={colors.muted} strokeWidth={1.7} />
           </View>
           <AppText variant="label" style={styles.quickName}>{choice.label}</AppText>
         </Pressable>
@@ -39,17 +46,17 @@ export function QuickOperations({ onChange }: Pick<Props, 'onChange'>) {
   );
 }
 
-export function OperationPicker(props: Props) {
-  return <OperationRows {...props} />;
-}
-
-// Setup remains a radio list; Home uses a more compact two-column shortcut grid.
-function OperationRows({ value, onChange }: Props) {
+// Setup needs a compact, clearly selected radio control without five tall rows.
+export function OperationPicker({ value, onChange }: Props) {
   const { colors } = useTheme();
+  const { width, fontScale } = useWindowDimensions();
+  const singleColumn = width < 340 || fontScale >= layout.largeText;
+
   return (
-    <View accessibilityRole="radiogroup" style={styles.list}>
+    <View accessibilityRole="radiogroup" style={styles.choices}>
       {operationChoices.map(choice => {
         const selected = value === choice.value;
+        const full = singleColumn || choice.value === 'mixed';
         return (
           <Pressable
             key={choice.value}
@@ -58,24 +65,23 @@ function OperationRows({ value, onChange }: Props) {
             accessibilityState={{ checked: selected }}
             onPress={() => onChange(choice.value)}
             style={({ pressed }) => [
-              styles.row,
-              { borderBottomColor: colors.border,
-                backgroundColor: pressed ? colors.pressed : selected ? colors.character : 'transparent' },
+              styles.choice,
+              full ? styles.choiceFull : styles.choiceHalf,
+              {
+                backgroundColor: selected ? colors.character : pressed ? colors.pressed : colors.surface,
+                borderColor: selected ? colors.primary : colors.border,
+              },
             ]}
           >
-            {selected && <View style={[styles.selectionRail, { backgroundColor: colors.primary }]} />}
-            <View style={styles.symbol}>
-              <OperationMark operation={choice.value} color={colors.primary} size={28} />
-            </View>
-            <View style={styles.copy}>
+            <OperationMark operation={choice.value} color={colors.primary} size={22} />
+            <View style={styles.choiceCopy}>
               <AppText variant="label">{choice.label}</AppText>
               {choice.value === 'mixed' && <AppText variant="caption" tone="muted">All four operations</AppText>}
             </View>
-            {selected
-              ? <View style={[styles.checked, { backgroundColor: colors.primary }]}>
-                  <Check size={16} color={colors.onPrimary} strokeWidth={2.5} />
-                </View>
-              : <View style={[styles.unchecked, { borderColor: colors.controlBorder }]} />}
+            {selected && (
+              <Check size={19} color={colors.primary} strokeWidth={2.4}
+                style={!full && styles.choiceCheck} />
+            )}
           </Pressable>
         );
       })}
@@ -84,25 +90,28 @@ function OperationRows({ value, onChange }: Props) {
 }
 
 const styles = StyleSheet.create({
-  quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  quickTile: {
-    flexGrow: 1, minWidth: 0, minHeight: 106, borderWidth: 1, borderRadius: 10,
-    paddingHorizontal: spacing.lg, paddingVertical: spacing.md,
-    justifyContent: 'space-between', gap: spacing.sm,
+  quickGrid: { flexDirection: 'row', flexWrap: 'wrap', borderTopWidth: StyleSheet.hairlineWidth },
+  quickItem: {
+    minHeight: 84, justifyContent: 'space-between', padding: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth, gap: spacing.sm,
   },
-  quickHalf: { flexBasis: '46%' },
-  quickFull: { flexBasis: '100%', minHeight: 76 },
+  quickHalf: { width: '50%' },
+  quickFull: { width: '100%' },
+  quickLeft: { borderRightWidth: StyleSheet.hairlineWidth },
   quickTop: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   quickName: { flexShrink: 1 },
-  list: { gap: 0 },
-  row: {
-    minHeight: 62, flexDirection: 'row', alignItems: 'center', gap: spacing.md,
-    paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+  choices: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  choice: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    borderWidth: 1, borderRadius: 6, minHeight: 62, paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
-  selectionRail: { position: 'absolute', top: spacing.sm, bottom: spacing.sm, left: 0, width: 3 },
-  symbol: { width: 36, height: 44, alignItems: 'center', justifyContent: 'center' },
-  copy: { flex: 1, minWidth: 0, gap: spacing.xs },
-  checked: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
-  unchecked: { width: 22, height: 22, borderWidth: 1.5, borderRadius: 11, marginRight: 1 },
+  choiceFull: { flexBasis: '100%', flexGrow: 1 },
+  choiceHalf: {
+    flexBasis: '46%', flexGrow: 1, minHeight: 76,
+    flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center',
+    gap: spacing.xs,
+  },
+  choiceCopy: { flexShrink: 1, minWidth: 0, gap: 2 },
+  choiceCheck: { position: 'absolute', top: spacing.sm, right: spacing.sm },
 });

@@ -9,7 +9,6 @@ import { sessionParams } from '@/engine/session/options';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { Header } from '@/components/ui/Header';
 import { Screen } from '@/components/ui/Screen';
-import { useTheme } from '@/theme/provider';
 import { spacing } from '@/theme/tokens';
 import { difficultyNames } from '@/engine/arithmetic/difficulty';
 import type { Difficulty, PracticeOperation } from '@/engine/arithmetic/types';
@@ -18,18 +17,31 @@ import { OperationPicker } from './OperationPicker';
 
 export function PracticeScreen() {
   const router = useRouter();
-  const { colors } = useTheme();
   const available = useAdaptiveAvailability();
   const [adaptive, setAdaptive] = useState(true);
   const personalized = adaptive && available;
   const [operation, setOperation] = useState<PracticeOperation>('mixed');
   const [difficulty, setDifficulty] = useState<Difficulty>(1);
 
+  const startPractice = () => router.navigate({
+    pathname: '/session', params: sessionParams(operation, difficulty, personalized),
+  });
+
   return (
-    <Screen>
+    <Screen
+      contentStyle={styles.screen}
+      footer={
+        <>
+          <AppText variant="metadata" tone="muted" style={styles.footerNote}>
+            10 questions · {personalized ? 'Adaptive difficulty' : difficultyNames[difficulty]}
+          </AppText>
+          <Button label="Start practice" arrow onPress={startPractice} />
+        </>
+      }
+    >
       <View style={styles.intro}>
         <Header title="Practice" />
-        <AppText variant="body" tone="muted">Choose your focus, then take on ten questions.</AppText>
+        <AppText variant="body" tone="muted">Pick what you want to practice.</AppText>
       </View>
       <View style={styles.group}>
         <SectionTitle title="Operation" />
@@ -38,25 +50,18 @@ export function PracticeScreen() {
       <View style={styles.group}>
         <SectionTitle title="Difficulty" />
         <SwitchRow label="Adaptive difficulty" value={personalized} onChange={setAdaptive} disabled={!available} />
-        {!available && <AppText variant="caption" tone="muted">Adaptive practice is unavailable. You can still choose a level.</AppText>}
+        {!available && <AppText variant="caption" tone="muted">Adaptive practice is unavailable. Manual practice still works.</AppText>}
         {personalized
-          ? <AppText variant="caption" tone="muted">Questions adjust to your saved skill levels.</AppText>
+          ? <AppText variant="caption" tone="muted">Questions adapt to your saved skill levels.</AppText>
           : <DifficultyPicker value={difficulty} onChange={setDifficulty} />}
-      </View>
-      <View style={[styles.footer, { borderTopColor: colors.border }]}>
-        <AppText variant="metadata" tone="muted">
-          10 questions · {personalized ? 'Adaptive' : difficultyNames[difficulty]}
-        </AppText>
-        <Button label="Start practice" arrow onPress={() => router.navigate({
-          pathname: '/session', params: sessionParams(operation, difficulty, personalized),
-        })} />
       </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: { gap: spacing.compact },
   intro: { gap: spacing.sm },
   group: { gap: spacing.md },
-  footer: { paddingTop: spacing.lg, borderTopWidth: StyleSheet.hairlineWidth, gap: spacing.md },
+  footerNote: { textAlign: 'center' },
 });

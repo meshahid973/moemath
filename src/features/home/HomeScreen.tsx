@@ -65,9 +65,9 @@ export function HomeScreen() {
 
 const styles = StyleSheet.create({
   home: { gap: spacing.compact },
-  welcome: { gap: spacing.md },
+  welcome: { gap: spacing.sm },
   hero: {
-    minHeight: 196, borderRadius: 16, overflow: 'hidden', justifyContent: 'center',
+    minHeight: 188, borderRadius: 12, overflow: 'hidden', justifyContent: 'center',
     paddingHorizontal: spacing.compact, paddingVertical: spacing.lg,
   },
   heroCopy: { justifyContent: 'center', gap: spacing.md, zIndex: 1 },
@@ -79,5 +79,5 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'flex-start', overflow: 'hidden',
   },
   mode: { textAlign: 'center' },
-  quick: { gap: spacing.md },
+  quick: { gap: spacing.sm },
 });

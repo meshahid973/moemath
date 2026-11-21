@@ -53,7 +53,7 @@ export function ProgressScreen() {
   const totals = rows ? aggregate(rows) : null;
 
   return (
-    <Screen>
+    <Screen contentStyle={styles.screen}>
       <View style={styles.intro}>
         <Header title="Progress" />
         <AppText variant="body" tone="muted">Your practice, at a glance.</AppText>
@@ -115,15 +115,16 @@ function Metric({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
+  screen: { gap: spacing.compact },
   intro: { gap: spacing.sm },
   notice: { gap: spacing.lg },
-  overview: { gap: spacing.lg },
-  lead: { paddingBottom: spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, gap: spacing.xs },
-  leadValue: { fontVariant: ['tabular-nums'] },
+  overview: { gap: spacing.md },
+  lead: { paddingBottom: spacing.sm, borderBottomWidth: StyleSheet.hairlineWidth, gap: spacing.xs },
+  leadValue: { fontSize: 60, lineHeight: 72, fontVariant: ['tabular-nums'] },
   metrics: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   metric: { flexGrow: 1, flexBasis: 90, gap: spacing.xs },
   metricValue: { fontVariant: ['tabular-nums'] },
-  chart: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: spacing.lg, gap: spacing.md },
+  chart: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: spacing.md, gap: spacing.sm },
   skills: { gap: spacing.sm },
   links: { gap: spacing.sm },
 });
