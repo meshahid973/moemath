@@ -18,7 +18,7 @@ export function Button({
   style, accessibilityState, ...props
 }: Props) {
   const { colors } = useTheme();
-  const nativeVariant = variant === 'primary' ? 'primary' : 'ghost';
+  const nativeVariant: 'primary' | 'ghost' = variant === 'primary' ? 'primary' : 'ghost';
   const appearance: ViewStyle = {
     borderRadius: 10,
     minHeight: 50,
@@ -28,7 +28,7 @@ export function Button({
   const common = {
     ...props,
     size: 'lg' as const,
-    variant: nativeVariant,
+    variant: nativeVariant as 'primary' | 'ghost',
     pressScale: 0.985,
     className: 'self-stretch',
     style: [appearance, style],
