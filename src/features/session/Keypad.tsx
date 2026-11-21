@@ -17,7 +17,7 @@ export const Keypad = memo(function Keypad({ onKey, canSubmit }: { onKey: (key: 
   const { colors } = useTheme();
   const { height, fontScale } = useWindowDimensions();
   const reducedMotion = useReducedMotion();
-  const compact = height < 760 || fontScale >= 1.3;
+  const compact = height < 760 && fontScale < 1.3;
 
   // Use the original beUI Native keypad/key components. Only the submit cell
   // has a product-specific label and fill; digit/delete motion is upstream.
