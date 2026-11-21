@@ -1,0 +1,48 @@
+/* Matches the default beUI palette in ui-components/lib/themes.ts.
+   Native surface maps to card; muted maps to muted-foreground. */
+@layer theme {
+  :root {
+    @variant light {
+      --color-background: oklch(99% 0 0);
+      --color-surface: oklch(97% 0 0);
+      --color-foreground: oklch(15% 0 0);
+      --color-muted: oklch(50% 0 0);
+      --color-border: oklch(15% 0 0 / 0.06);
+      --color-border-strong: oklch(15% 0 0 / 0.16);
+      --color-primary: #0285f7;
+      --color-on-primary: #ffffff;
+      --color-destructive: #dc2626;
+      --color-success: #059669;
+      --color-warning: #d97706;
+    }
+  }
+
+  :root {
+    @variant dark {
+      --color-background: #151515;
+      --color-surface: #1c1c1c;
+      --color-foreground: oklch(96% 0 0);
+      --color-muted: oklch(62% 0 0);
+      --color-border: rgb(255 255 255 / 0.05);
+      --color-border-strong: rgb(255 255 255 / 0.14);
+      --color-primary: #0285f7;
+      --color-on-primary: #ffffff;
+      --color-destructive: #f87171;
+      --color-success: #34d399;
+      --color-warning: #fbbf24;
+    }
+  }
+
+  /* Tailwind's default monospace stack isn't a font React Native can load. */
+  :root {
+    @variant ios {
+      --font-mono: Menlo;
+    }
+  }
+
+  :root {
+    @variant android {
+      --font-mono: monospace;
+    }
+  }
+}
