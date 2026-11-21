@@ -1,48 +1,34 @@
-/* Matches the default beUI palette in ui-components/lib/themes.ts.
-   Native surface maps to card; muted maps to muted-foreground. */
+/* Semantic tokens for the original beUI Native components.
+   Keep these in sync with src/theme/tokens.ts; Uniwind is used only by beUI. */
 @layer theme {
   :root {
     @variant light {
-      --color-background: oklch(99% 0 0);
-      --color-surface: oklch(97% 0 0);
-      --color-foreground: oklch(15% 0 0);
-      --color-muted: oklch(50% 0 0);
-      --color-border: oklch(15% 0 0 / 0.06);
-      --color-border-strong: oklch(15% 0 0 / 0.16);
-      --color-primary: #0285f7;
+      --color-background: #fff8fc;
+      --color-surface: #f6f1fa;
+      --color-foreground: #292d5c;
+      --color-muted: #646078;
+      --color-border: #d3cbe1;
+      --color-border-strong: #777087;
+      --color-primary: #3e429c;
       --color-on-primary: #ffffff;
-      --color-destructive: #dc2626;
-      --color-success: #059669;
-      --color-warning: #d97706;
+      --color-destructive: #b1245c;
+      --color-success: #1d6b58;
+      --color-warning: #b1245c;
     }
   }
-
   :root {
     @variant dark {
-      --color-background: #151515;
-      --color-surface: #1c1c1c;
-      --color-foreground: oklch(96% 0 0);
-      --color-muted: oklch(62% 0 0);
-      --color-border: rgb(255 255 255 / 0.05);
-      --color-border-strong: rgb(255 255 255 / 0.14);
-      --color-primary: #0285f7;
-      --color-on-primary: #ffffff;
-      --color-destructive: #f87171;
-      --color-success: #34d399;
-      --color-warning: #fbbf24;
-    }
-  }
-
-  /* Tailwind's default monospace stack isn't a font React Native can load. */
-  :root {
-    @variant ios {
-      --font-mono: Menlo;
-    }
-  }
-
-  :root {
-    @variant android {
-      --font-mono: monospace;
+      --color-background: #000000;
+      --color-surface: #13121b;
+      --color-foreground: #f1efff;
+      --color-muted: #bdb5cf;
+      --color-border: #39334e;
+      --color-border-strong: #8c849f;
+      --color-primary: #c3c4ff;
+      --color-on-primary: #242342;
+      --color-destructive: #ffa2c5;
+      --color-success: #8cd8be;
+      --color-warning: #ffa2c5;
     }
   }
 }

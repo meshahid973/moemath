@@ -5,10 +5,8 @@ import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { Header } from '@/components/ui/Header';
 import { Screen } from '@/components/ui/Screen';
-import { SectionTitle } from '@/components/ui/SectionTitle';
 import { SegmentedChoice } from '@/components/ui/SegmentedChoice';
 import { SkillLevels } from '@/features/adaptive/SkillLevels';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { dailyTotals } from '@/database/history';
 import { aggregate, type DailyTotals, type Period } from '@/engine/progress/metrics';
 import { useTheme } from '@/theme/provider';
@@ -17,7 +15,7 @@ import { ProgressChart } from './ProgressChart';
 import { useAdaptive } from '@/features/adaptive/AdaptiveProvider';
 
 const periods = [{ value: 1, label: 'Today' }, { value: 7, label: '7 days' }, { value: 30, label: '30 days' }] as const;
-const metrics = [{ value: 'activity', label: 'Activity' }, { value: 'accuracy', label: 'Accuracy' }, { value: 'speed', label: 'Speed' }] as const;
+const metrics = [{ value: 'activity', label: 'Questions' }, { value: 'accuracy', label: 'Accuracy' }, { value: 'speed', label: 'Speed' }] as const;
 
 export function ProgressScreen() {
   const router = useRouter();
@@ -54,14 +52,11 @@ export function ProgressScreen() {
 
   return (
     <Screen contentStyle={styles.screen}>
-      <View style={styles.intro}>
-        <Header title="Progress" />
-        <AppText variant="body" tone="muted">Your practice, at a glance.</AppText>
-      </View>
+      <Header title="Progress" />
       <SegmentedChoice options={periods} value={period} onChange={setPeriod} />
       {error ? (
         <View style={styles.notice}>
-          <AppText tone="muted">Could not load your statistics.</AppText>
+          <AppText tone="danger">Could not load your statistics.</AppText>
           <Button label="Retry" variant="secondary" onPress={() => setRetry(x => x + 1)} />
         </View>
       ) : !totals ? (
@@ -69,10 +64,11 @@ export function ProgressScreen() {
       ) : (
         <View style={styles.overview}>
           <View style={[styles.lead, { borderBottomColor: colors.border }]}>
-            <AppText variant="caption" tone="muted">Questions answered</AppText>
-            <AppText variant="score" tone="primary" style={styles.leadValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
-              {String(totals.total)}
-            </AppText>
+            <AppText variant="score" tone="primary" style={styles.count} numberOfLines={1}>{String(totals.total)}</AppText>
+            <View style={styles.leadCopy}>
+              <AppText variant="label">questions answered</AppText>
+              <AppText variant="caption" tone="muted">{period === 1 ? 'today' : 'in the selected period'}</AppText>
+            </View>
           </View>
           <View style={styles.metrics}>
             <Metric label="Accuracy" value={totals.accuracy === null ? '—' : Math.round(totals.accuracy * 100) + '%'} />
@@ -80,26 +76,25 @@ export function ProgressScreen() {
             <Metric label="Sessions" value={String(totals.sessions)} />
           </View>
           {totals.total > 0 && rows ? (
-            <View style={[styles.chart, { borderTopColor: colors.border }]}>
-              <SectionTitle title="Activity details" />
+            <View style={styles.chart}>
+              <AppText variant="heading" accessibilityRole="header">Practice rhythm</AppText>
               <SegmentedChoice options={metrics} value={metric} onChange={setMetric} />
               <ProgressChart key={period + ':' + metric} rows={rows} metric={metric} />
             </View>
           ) : (
-            <EmptyState
-              title="Every answer adds up."
-              message="Complete a session to see your progress here."
-              action="Start practice"
-              onPress={() => router.push('/practice')}
-            />
+            <View style={styles.empty}>
+              <AppText variant="heading">A quiet {period === 1 ? 'day' : 'stretch'}.</AppText>
+              <AppText variant="caption" tone="muted">No practice recorded for this period.</AppText>
+              <Button label="Start a session" variant="secondary" arrow onPress={() => router.push('/practice')} />
+            </View>
           )}
         </View>
       )}
       <View style={styles.skills}>
-        <SectionTitle title="Your skills" />
+        <AppText variant="heading" accessibilityRole="header">Skill levels</AppText>
         <SkillLevels />
       </View>
-      <View style={styles.links}>
+      <View style={[styles.links, { borderTopColor: colors.border }]}>
         <Button label="Session history" arrow variant="secondary" onPress={() => router.push('/history')} />
         <Button label="Review mistakes" arrow variant="secondary" onPress={() => router.push('/review')} />
       </View>
@@ -108,23 +103,26 @@ export function ProgressScreen() {
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
-  return <View style={styles.metric}>
-    <AppText variant="heading" tone="primary" style={styles.metricValue}>{value}</AppText>
-    <AppText variant="caption" tone="muted">{label}</AppText>
-  </View>;
+  return (
+    <View style={styles.metric}>
+      <AppText variant="heading" tone="primary" style={styles.metricValue}>{value}</AppText>
+      <AppText variant="caption" tone="muted">{label}</AppText>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  screen: { gap: spacing.compact },
-  intro: { gap: spacing.sm },
-  notice: { gap: spacing.lg },
+  screen: { gap: spacing.lg },
+  notice: { gap: spacing.sm },
   overview: { gap: spacing.md },
-  lead: { paddingBottom: spacing.sm, borderBottomWidth: StyleSheet.hairlineWidth, gap: spacing.xs },
-  leadValue: { fontSize: 60, lineHeight: 72, fontVariant: ['tabular-nums'] },
-  metrics: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
-  metric: { flexGrow: 1, flexBasis: 90, gap: spacing.xs },
+  lead: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: StyleSheet.hairlineWidth, paddingBottom: spacing.sm, gap: spacing.lg },
+  count: { fontSize: 58, lineHeight: 72, fontVariant: ['tabular-nums'] },
+  leadCopy: { flexShrink: 1, gap: spacing.xs },
+  metrics: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: spacing.md },
+  metric: { flexGrow: 1, flexBasis: 80, gap: spacing.xs },
   metricValue: { fontVariant: ['tabular-nums'] },
-  chart: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: spacing.md, gap: spacing.sm },
+  chart: { gap: spacing.md, marginTop: spacing.md },
+  empty: { gap: spacing.xs, paddingVertical: spacing.md },
   skills: { gap: spacing.sm },
-  links: { gap: spacing.sm },
+  links: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: spacing.sm, gap: 0 },
 });

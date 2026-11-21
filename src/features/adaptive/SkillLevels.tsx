@@ -1,6 +1,5 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
-import { Surface } from '@/components/ui/Surface';
 import { Button } from '@/components/ui/Button';
 import { useTheme } from '@/theme/provider';
 import { spacing } from '@/theme/tokens';
@@ -12,8 +11,9 @@ import { useAdaptive } from './AdaptiveProvider';
 export function SkillLevels() {
   const { profile, ready, error, pending, retrySave } = useAdaptive();
   const { colors } = useTheme();
+
   return (
-    <Surface style={styles.list}>
+    <View style={styles.list}>
       {error && (
         <View style={styles.notice}>
           <AppText tone="danger">Skill data could not be saved or loaded.</AppText>
@@ -28,9 +28,11 @@ export function SkillLevels() {
         return (
           <View key={choice.value} style={[styles.skill, { borderBottomColor: colors.border }]}>
             <View style={styles.row}>
-              <OperationMark operation={choice.value} color={colors.primary} size={22} />
+              <OperationMark operation={choice.value} color={colors.primary} size={19} />
               <AppText variant="label" style={styles.label}>{choice.label}</AppText>
-              <AppText variant="metadata" tone="primary">Level {skill.level}/6</AppText>
+              <AppText variant="caption" tone="muted">
+                {skill.seen > 0 && a !== null ? Math.round(a * 100) + '% · ' : ''}Level {skill.level}/6
+              </AppText>
             </View>
             <View style={styles.bar} accessibilityRole="progressbar" accessibilityLabel={choice.label + ' level'}
               accessibilityValue={{ min: 0, max: 6, now: skill.level }}>
@@ -38,22 +40,19 @@ export function SkillLevels() {
                 <View key={i} style={[styles.segment, { backgroundColor: i < skill.level ? colors.primary : colors.border }]} />
               ))}
             </View>
-            <AppText variant="caption" tone="muted">
-              {skill.seen === 0 ? 'Not practiced yet' : a === null ? 'Building new level' : Math.round(a * 100) + '% recent accuracy'}
-            </AppText>
           </View>
         );
       })}
-    </Surface>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  list: { paddingTop: spacing.sm, gap: 0 },
-  notice: { paddingBottom: spacing.md, gap: spacing.sm },
-  skill: { gap: spacing.sm, paddingVertical: spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth },
+  list: { gap: 0 },
+  notice: { gap: spacing.xs },
+  skill: { paddingVertical: spacing.md, gap: spacing.sm, borderBottomWidth: StyleSheet.hairlineWidth },
   row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm },
-  label: { flex: 1, minWidth: 96 },
+  label: { flex: 1, minWidth: 88 },
   bar: { flexDirection: 'row', gap: spacing.xs },
-  segment: { flex: 1, height: 5, borderRadius: 1 },
+  segment: { flex: 1, height: 3, borderRadius: 1 },
 });

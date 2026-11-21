@@ -6,7 +6,6 @@ import { AppText } from '@/components/ui/AppText';
 import { useAdaptiveAvailability } from '@/features/adaptive/AdaptiveProvider';
 import { Button } from '@/components/ui/Button';
 import { sessionParams } from '@/engine/session/options';
-import { SectionTitle } from '@/components/ui/SectionTitle';
 import { Header } from '@/components/ui/Header';
 import { Screen } from '@/components/ui/Screen';
 import { spacing } from '@/theme/tokens';
@@ -22,46 +21,41 @@ export function PracticeScreen() {
   const personalized = adaptive && available;
   const [operation, setOperation] = useState<PracticeOperation>('mixed');
   const [difficulty, setDifficulty] = useState<Difficulty>(1);
-
-  const startPractice = () => router.navigate({
-    pathname: '/session', params: sessionParams(operation, difficulty, personalized),
-  });
+  const start = () => router.navigate({ pathname: '/session', params: sessionParams(operation, difficulty, personalized) });
 
   return (
     <Screen
       contentStyle={styles.screen}
       footer={
-        <>
-          <AppText variant="metadata" tone="muted" style={styles.footerNote}>
-            10 questions · {personalized ? 'Adaptive difficulty' : difficultyNames[difficulty]}
-          </AppText>
-          <Button label="Start practice" arrow onPress={startPractice} />
-        </>
+        <View style={styles.action}>
+          <AppText variant="caption" tone="muted">10 questions · {personalized ? 'Adaptive' : difficultyNames[difficulty]}</AppText>
+          <Button label="Start practice" arrow onPress={start} />
+        </View>
       }
     >
+      <Header title="Practice" />
       <View style={styles.intro}>
-        <Header title="Practice" />
-        <AppText variant="body" tone="muted">Pick what you want to practice.</AppText>
+        <AppText variant="heading">What shall we solve?</AppText>
+        <AppText variant="caption" tone="muted">Pick one focus, or mix them together.</AppText>
       </View>
-      <View style={styles.group}>
-        <SectionTitle title="Operation" />
+      <View style={styles.options}>
         <OperationPicker value={operation} onChange={setOperation} />
       </View>
-      <View style={styles.group}>
-        <SectionTitle title="Difficulty" />
-        <SwitchRow label="Adaptive difficulty" value={personalized} onChange={setAdaptive} disabled={!available} />
-        {!available && <AppText variant="caption" tone="muted">Adaptive practice is unavailable. Manual practice still works.</AppText>}
+      <View style={styles.difficulty}>
+        <AppText variant="label">Difficulty</AppText>
+        <SwitchRow label="Adaptive" value={personalized} onChange={setAdaptive} disabled={!available} />
+        {!available && <AppText variant="caption" tone="muted">Adaptive mode is unavailable. Manual levels still work.</AppText>}
         {personalized
-          ? <AppText variant="caption" tone="muted">Questions adapt to your saved skill levels.</AppText>
+          ? <AppText variant="caption" tone="muted">Questions adjust to your saved skill levels.</AppText>
           : <DifficultyPicker value={difficulty} onChange={setDifficulty} />}
       </View>
     </Screen>
   );
 }
-
 const styles = StyleSheet.create({
-  screen: { gap: spacing.compact },
-  intro: { gap: spacing.sm },
-  group: { gap: spacing.md },
-  footerNote: { textAlign: 'center' },
+  screen: { gap: spacing.lg },
+  intro: { gap: spacing.xs },
+  options: { gap: 0 },
+  difficulty: { gap: spacing.sm },
+  action: { gap: spacing.xs },
 });

@@ -1,72 +1,64 @@
-import { useReducedMotion } from 'react-native-reanimated';
 import { memo } from 'react';
-import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
-import { Check, Delete } from 'lucide-react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Check } from 'lucide-react-native';
+import { useReducedMotion } from 'react-native-reanimated';
+import { Keypad as NativeKeypad, KeypadDelete, KeypadKey, KeypadRow } from '@/components/keypad';
 import { AppText } from '@/components/ui/AppText';
 import { useTheme } from '@/theme/provider';
-import { radius, spacing } from '@/theme/tokens';
+import { spacing } from '@/theme/tokens';
 
 export type Key = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'delete' | 'submit';
+
 const rows: readonly (readonly Key[])[] = [
   ['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['delete', '0', 'submit'],
 ];
 
-type Props = { onKey: (key: Key) => void; canSubmit: boolean };
-
-export const Keypad = memo(function Keypad({ onKey, canSubmit }: Props) {
-  const reducedMotion = useReducedMotion();
+export const Keypad = memo(function Keypad({ onKey, canSubmit }: { onKey: (key: Key) => void; canSubmit: boolean }) {
   const { colors } = useTheme();
-  const { height } = useWindowDimensions();
-  const minHeight = height < 700 ? 50 : 62;
+  const { height, fontScale } = useWindowDimensions();
+  const reducedMotion = useReducedMotion();
+  const compact = height < 760 || fontScale >= 1.3;
 
+  // Use the original beUI Native keypad/key components. Only the submit cell
+  // has a product-specific label and fill; digit/delete motion is upstream.
   return (
-    <View style={styles.grid}>
+    <NativeKeypad
+      size={compact ? 'sm' : 'md'}
+      variant="plain"
+      disableAnimation={reducedMotion}
+      onKeyPress={value => {
+        if (/^[0-9]$/.test(value) || value === 'delete' || value === 'submit') onKey(value as Key);
+      }}
+      style={styles.pad}
+    >
       {rows.map((row, index) => (
-        <View key={index} style={styles.row}>
-          {row.map(key => {
-            const submit = key === 'submit';
-            const disabled = submit && !canSubmit;
-            return (
-              <Pressable
-                key={key}
-                testID={'key-' + key}
-                accessibilityRole="button"
-                accessibilityLabel={key === 'delete' ? 'Delete digit' : submit ? 'Submit answer' : key}
-                accessibilityState={{ disabled }}
-                disabled={disabled}
-                onPress={() => onKey(key)}
-                style={({ pressed }) => [
-                  styles.key,
-                  {
-                    minHeight,
-                    backgroundColor: disabled ? colors.disabled : submit ? colors.primary : pressed ? colors.pressed : colors.surface,
-                    borderColor: disabled ? colors.disabled : submit ? colors.primary : colors.controlBorder,
-                    borderBottomColor: disabled ? colors.disabled : submit ? colors.primary : pressed ? colors.primary : colors.border,
-                    transform: [{ scale: pressed && !reducedMotion ? 0.985 : 1 }],
-                  },
-                ]}
-              >
-                {key === 'delete'
-                  ? <Delete size={24} color={colors.muted} strokeWidth={1.75} />
-                  : submit
-                    ? <Check size={27} color={disabled ? colors.onDisabled : colors.onPrimary} strokeWidth={2} />
-                    : <AppText variant="heading" style={styles.digit}>{key}</AppText>}
-              </Pressable>
-            );
-          })}
-        </View>
+        <KeypadRow key={index} style={styles.row}>
+          {row.map(key => key === 'delete'
+            ? <KeypadDelete key={key} testID="key-delete" accessibilityLabel="Delete digit" />
+            : key === 'submit'
+              ? (
+                <KeypadKey key={key} value="submit" testID="key-submit" accessibilityLabel="Submit answer" disabled={!canSubmit}>
+                  <View style={[styles.submit, { backgroundColor: canSubmit ? colors.primary : colors.disabled }]}>
+                    <Check size={23} color={canSubmit ? colors.onPrimary : colors.onDisabled} strokeWidth={2.3} />
+                  </View>
+                </KeypadKey>
+              )
+              : (
+                <KeypadKey key={key} value={key} testID={'key-' + key} accessibilityLabel={key}>
+                  <AppText variant="heading" style={styles.digit}>{key}</AppText>
+                </KeypadKey>
+              ),
+          )}
+        </KeypadRow>
       ))}
-    </View>
+    </NativeKeypad>
   );
 });
 
 const styles = StyleSheet.create({
-  grid: { gap: spacing.sm },
-  row: { flexDirection: 'row', gap: spacing.sm },
-  key: {
-    flex: 1, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderBottomWidth: 2, borderRadius: radius.control,
-    paddingVertical: spacing.xs,
-  },
-  digit: { fontSize: 27, fontVariant: ['tabular-nums'] },
+  pad: { gap: spacing.xs },
+  row: { gap: spacing.sm },
+  digit: { fontSize: 24, fontVariant: ['tabular-nums'] },
+  submit: { flex: 1, alignSelf: 'stretch', marginHorizontal: 4, borderRadius: 9,
+    alignItems: 'center', justifyContent: 'center' },
 });

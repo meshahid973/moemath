@@ -5,21 +5,20 @@ import type { Question } from '@/engine/arithmetic/types';
 import { formatEquation } from '@/engine/arithmetic/format';
 import type { SessionAttempt } from '@/engine/session/session';
 import { useTheme } from '@/theme/provider';
-import { radius, spacing } from '@/theme/tokens';
+import { spacing } from '@/theme/tokens';
 import { SessionCompanion } from './SessionCompanion';
 import { AnswerFeedback } from './AnswerFeedback';
 
-// The expression updates immediately on each question: no entrance animation can
-// delay a new problem or compete with keypad input.
+// Keep math immediate. Neither the equation nor the typed answer animates.
 const Equation = memo(function Equation({ question }: { question: Question }) {
   return (
     <AppText
       variant="equation"
-      tone="onMath"
       style={styles.equation}
       numberOfLines={1}
       adjustsFontSizeToFit
-      minimumFontScale={0.5}
+      minimumFontScale={0.55}
+      accessibilityRole="text"
     >
       {formatEquation(question)}
     </AppText>
@@ -35,17 +34,18 @@ export const QuestionStage = memo(function QuestionStage({ question, input, prev
   return (
     <View style={styles.stage}>
       <SessionCompanion previous={previous} />
-      <View style={[styles.mathBand, { backgroundColor: colors.math }]}>
+      <View style={styles.work}>
         <Equation question={question} />
-        <View style={[styles.answer, { borderTopColor: colors.onMath + '55' }]}>
+        <View style={[styles.answer, { borderBottomColor: colors.primary }]}>
           <AppText
             variant="answer"
-            tone="onMath"
+            tone={input ? 'primary' : 'muted'}
             style={styles.answerText}
             numberOfLines={1}
             adjustsFontSizeToFit
-            minimumFontScale={0.6}
+            minimumFontScale={0.55}
             accessibilityLabel={input ? 'Answer ' + input : 'Answer empty'}
+            accessibilityLiveRegion="polite"
           >
             {input || '?'}
           </AppText>
@@ -57,16 +57,10 @@ export const QuestionStage = memo(function QuestionStage({ question, input, prev
 });
 
 const styles = StyleSheet.create({
-  stage: { flexGrow: 1, justifyContent: 'center', gap: spacing.md },
-  mathBand: {
-    minHeight: 192, flexGrow: 1, borderRadius: radius.control,
-    justifyContent: 'center', gap: spacing.md,
-    paddingHorizontal: spacing.lg, paddingVertical: spacing.compact,
-  },
-  equation: { textAlign: 'center', fontVariant: ['tabular-nums'] },
-  answer: {
-    minHeight: 70, justifyContent: 'center', paddingTop: spacing.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
-  },
+  stage: { flexGrow: 1, minHeight: 208, justifyContent: 'space-around', gap: spacing.sm },
+  work: { flexGrow: 1, justifyContent: 'center', gap: spacing.xl },
+  equation: { fontSize: 52, lineHeight: 72, textAlign: 'center', fontVariant: ['tabular-nums'] },
+  answer: { alignSelf: 'center', width: '62%', minWidth: 136, maxWidth: 260,
+    minHeight: 60, borderBottomWidth: 2, alignItems: 'center', justifyContent: 'center' },
   answerText: { textAlign: 'center', fontVariant: ['tabular-nums'] },
 });

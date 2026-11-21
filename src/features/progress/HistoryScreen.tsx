@@ -30,18 +30,17 @@ export function HistoryScreen() {
   }, [cursor, retry]));
 
   return (
-    <Screen full>
-      <Header title="Session history" back />
-      <AppText variant="body" tone="muted">Every completed session, in order.</AppText>
+    <Screen full contentStyle={styles.screen}>
+      <Header title="History" back />
       {error ? (
         <View style={styles.notice}>
-          <AppText tone="muted">Could not load your history.</AppText>
+          <AppText tone="danger">Could not load your history.</AppText>
           <Button label="Retry" variant="secondary" onPress={() => setRetry(x => x + 1)} />
         </View>
       ) : !page || page.retry !== retry ? (
         <AppText tone="muted">Loading history...</AppText>
       ) : !page.rows.length ? (
-        <EmptyState title="Your story starts here." message="Complete a session to build your practice record." action="Start practice" onPress={() => router.push('/practice')} />
+        <EmptyState title="No sessions yet" message="Your completed practice sessions will appear here." action="Start practice" onPress={() => router.push('/practice')} />
       ) : (
         <>
           <View style={styles.ledger}>
@@ -61,22 +60,19 @@ export function HistoryScreen() {
                 >
                   <View style={styles.copy}>
                     <AppText variant="label">{date}</AppText>
-                    <AppText variant="caption" tone="muted">{formatTime(row.elapsedMs)} practice time</AppText>
+                    <AppText variant="caption" tone="muted">{formatTime(row.elapsedMs)} elapsed</AppText>
                   </View>
-                  <View style={styles.result}>
-                    <AppText variant="heading" tone="primary" style={styles.numerals}>{row.correct}/{row.total}</AppText>
-                    <AppText variant="caption" tone="muted">correct</AppText>
-                  </View>
-                  <ChevronRight size={20} color={colors.muted} />
+                  <AppText variant="heading" tone="primary" style={styles.numerals}>{row.correct}/{row.total}</AppText>
+                  <ChevronRight size={18} color={colors.muted} />
                 </Pressable>
               );
             })}
           </View>
           <View style={styles.page}>
-            <Button label="Previous" variant="secondary" disabled={cursors.length <= 1} style={styles.pageButton}
+            <Button label="Previous" variant="secondary" disabled={cursors.length <= 1}
               onPress={() => { setPage(null); setCursors(previous => previous.slice(0, -1)); }} />
             <AppText variant="metadata" tone="muted">Page {cursors.length}</AppText>
-            <Button label="Next" variant="secondary" disabled={!page.more} style={styles.pageButton}
+            <Button label="Next" variant="secondary" disabled={!page.more}
               onPress={() => { setCursors(previous => [...previous, page.rows.at(-1)!]); setPage(null); }} />
           </View>
         </>
@@ -86,14 +82,13 @@ export function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
+  screen: { gap: spacing.lg },
   notice: { gap: spacing.md },
   ledger: { gap: 0 },
-  row: { minHeight: 84, borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: 'row',
-    alignItems: 'center', gap: spacing.md, paddingVertical: spacing.md, paddingHorizontal: spacing.xs },
+  row: { minHeight: 66, borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: 'row',
+    alignItems: 'center', gap: spacing.md, paddingVertical: spacing.sm, paddingHorizontal: spacing.xs },
   copy: { flex: 1, minWidth: 0, gap: spacing.xs },
-  result: { alignItems: 'flex-end', gap: spacing.xs },
   numerals: { fontVariant: ['tabular-nums'] },
   page: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    flexWrap: 'wrap', gap: spacing.sm },
-  pageButton: { flexGrow: 1, flexBasis: 104 },
+    flexWrap: 'wrap', gap: spacing.xs },
 });

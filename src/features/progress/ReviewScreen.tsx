@@ -17,7 +17,6 @@ export function ReviewScreen() {
   const { colors } = useTheme();
   const { profile, ready, error, pending, retrySave } = useAdaptive();
   const [now, setNow] = useState(() => Date.now());
-
   useFocusEffect(useCallback(() => {
     const timer = setTimeout(() => setNow(Date.now()), 0);
     return () => clearTimeout(timer);
@@ -27,14 +26,8 @@ export function ReviewScreen() {
   const dueCount = profile.review.filter(item => item.due <= now).length;
 
   return (
-    <Screen full>
-      <Header title="Review mistakes" back />
-      <View style={styles.intro}>
-        <AppText variant="heading">Keep what you’ve learned.</AppText>
-        <AppText variant="body" tone="muted">
-          Due questions come first. Reviewing early does not clear a scheduled review.
-        </AppText>
-      </View>
+    <Screen full contentStyle={styles.screen}>
+      <Header title="Mistake review" back />
       {!ready && !error ? (
         <AppText tone="muted">Loading reviews...</AppText>
       ) : error ? (
@@ -44,37 +37,37 @@ export function ReviewScreen() {
         </View>
       ) : (
         <>
-          <View style={[styles.summary, { borderBottomColor: colors.border }]}>
+          <View style={styles.overview}>
             <View style={styles.counts}>
               <View style={styles.count}>
-                <AppText variant="score" tone="primary" style={styles.countValue} numberOfLines={1}>{profile.review.length}</AppText>
-                <AppText variant="caption" tone="muted">To review</AppText>
+                <AppText variant="score" tone="primary" style={styles.bigNumber}>{dueCount}</AppText>
+                <AppText variant="label">due now</AppText>
               </View>
-              <View style={styles.count}>
-                <AppText variant="heading" tone="primary">{dueCount}</AppText>
-                <AppText variant="caption" tone="muted">Due now</AppText>
-              </View>
+              <AppText variant="caption" tone="muted">{profile.review.length} questions in review</AppText>
             </View>
-            <Button label="Start review" arrow disabled={pending || !items.length}
-              onPress={() => router.push({ pathname: '/session', params: { ...sessionParams('mixed', 1), review: '1' } })} />
+            {items.length > 0 && (
+              <Button label="Start review" arrow disabled={pending}
+                onPress={() => router.push({ pathname: '/session', params: { ...sessionParams('mixed', 1), review: '1' } })} />
+            )}
           </View>
           {!items.length ? (
-            <EmptyState title="A clean slate." message="Mistakes from future sessions will return here for another try."
+            <EmptyState title="All caught up" message="Mistakes from future sessions will appear here."
               action="Go to practice" onPress={() => router.push('/practice')} />
           ) : (
             <View style={styles.list}>
-              <AppText variant="heading" accessibilityRole="header">Questions</AppText>
+              <AppText variant="heading" accessibilityRole="header">Your questions</AppText>
               {items.map(item => (
                 <View key={item.question.key} style={[styles.row, { borderBottomColor: colors.border }]}>
-                  <AppText variant="heading" style={styles.equation}>{formatEquation(item.question)}</AppText>
+                  <AppText variant="label" style={styles.equation}>{formatEquation(item.question)}</AppText>
                   <AppText variant="caption" tone={item.due <= now ? 'primary' : 'muted'}>
-                    {item.due <= now ? 'Due for review' : 'Early review available'}
+                    {item.due <= now ? 'Due' : 'Available early'}
                   </AppText>
                 </View>
               ))}
-              {profile.review.length > items.length && (
-                <AppText variant="caption" tone="muted">Showing the first {items.length} questions.</AppText>
-              )}
+              <AppText variant="caption" tone="muted">
+                Early review does not clear a scheduled review.
+                {profile.review.length > items.length ? ' Showing the first ten questions.' : ''}
+              </AppText>
             </View>
           )}
         </>
@@ -84,14 +77,15 @@ export function ReviewScreen() {
 }
 
 const styles = StyleSheet.create({
-  notice: { gap: spacing.md },
-  intro: { gap: spacing.sm },
-  summary: { gap: spacing.lg, paddingBottom: spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth },
-  counts: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-end', gap: spacing.xxl },
-  count: { gap: spacing.xs },
-  countValue: { fontVariant: ['tabular-nums'] },
-  list: { gap: spacing.sm },
-  row: { minHeight: 72, justifyContent: 'center', borderBottomWidth: StyleSheet.hairlineWidth,
-    paddingVertical: spacing.md, gap: spacing.xs },
-  equation: { fontVariant: ['tabular-nums'] },
+  screen: { gap: spacing.lg },
+  notice: { gap: spacing.sm },
+  overview: { gap: spacing.lg },
+  counts: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: spacing.lg },
+  count: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
+  bigNumber: { fontSize: 56, lineHeight: 68, fontVariant: ['tabular-nums'] },
+  list: { gap: spacing.xs },
+  row: { minHeight: 58, flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'space-between', gap: spacing.sm, paddingVertical: spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth },
+  equation: { flexShrink: 1, fontVariant: ['tabular-nums'] },
 });

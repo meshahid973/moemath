@@ -1,12 +1,13 @@
+import '../../global.css';
 import { useEffect, useMemo } from 'react';
 import { enableFreeze } from 'react-native-screens';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { useFonts } from 'expo-font';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { fontAssets } from '@/theme/fonts';
 import { ThemeProvider, useTheme } from '@/theme/provider';
-
 import { AdaptiveProvider } from '@/features/adaptive/AdaptiveProvider';
 import { PreferencesProvider, usePreferencesReady } from '@/features/settings/PreferencesProvider';
 
@@ -18,7 +19,9 @@ function Navigation() {
     void SystemUI.setBackgroundColorAsync(colors.background).catch(() => {});
   }, [colors.background]);
 
-  const screenOptions = useMemo(() => ({ headerShown: false, freezeOnBlur: true, contentStyle: { backgroundColor: colors.background } }), [colors.background]);
+  const screenOptions = useMemo(() => ({
+    headerShown: false, freezeOnBlur: true, contentStyle: { backgroundColor: colors.background },
+  }), [colors.background]);
 
   return (
     <>
@@ -37,11 +40,19 @@ function Navigation() {
 
 function ReadyApp({ fontsReady }: { fontsReady: boolean }) {
   const ready = usePreferencesReady();
-  return ready ? <ThemeProvider fontsReady={fontsReady}><AdaptiveProvider><Navigation /></AdaptiveProvider></ThemeProvider> : null;
+  return ready ? (
+    <ThemeProvider fontsReady={fontsReady}>
+      <AdaptiveProvider><Navigation /></AdaptiveProvider>
+    </ThemeProvider>
+  ) : null;
 }
 
 export default function RootLayout() {
   const [loaded, error] = useFonts(fontAssets);
   if (!loaded && !error) return null;
-  return <PreferencesProvider><ReadyApp fontsReady={loaded} /></PreferencesProvider>;
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PreferencesProvider><ReadyApp fontsReady={loaded} /></PreferencesProvider>
+    </GestureHandlerRootView>
+  );
 }

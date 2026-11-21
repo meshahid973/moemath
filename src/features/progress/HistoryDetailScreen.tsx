@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/Button';
 import { AppText } from '@/components/ui/AppText';
 import { Header } from '@/components/ui/Header';
 import { Screen } from '@/components/ui/Screen';
-import { SectionTitle } from '@/components/ui/SectionTitle';
 import { sessionDetail, type SessionDetail } from '@/database/history';
 import { formatTime } from '@/engine/session/clock';
 import { spacing } from '@/theme/tokens';
@@ -28,11 +27,11 @@ export function HistoryDetailScreen() {
   }, [id, retry]));
 
   return (
-    <Screen full>
+    <Screen full contentStyle={styles.screen}>
       <Header title="Session details" back />
       {error ? (
         <View style={styles.notice}>
-          <AppText tone="muted">Could not load this session.</AppText>
+          <AppText tone="danger">Could not load this session.</AppText>
           <Button label="Retry" variant="secondary" onPress={() => setRetry(x => x + 1)} />
         </View>
       ) : detail === undefined ? (
@@ -48,18 +47,12 @@ export function HistoryDetailScreen() {
               <AppText variant="denominator" tone="muted">/ {detail.total}</AppText>
             </View>
             <View style={styles.metrics}>
-              <View style={styles.metric}>
-                <AppText variant="heading" tone="primary">{detail.total > 0 ? Math.round(detail.correct / detail.total * 100) + '%' : '—'}</AppText>
-                <AppText variant="caption" tone="muted">Accuracy</AppText>
-              </View>
-              <View style={styles.metric}>
-                <AppText variant="heading" tone="primary">{formatTime(detail.elapsedMs)}</AppText>
-                <AppText variant="caption" tone="muted">Time</AppText>
-              </View>
+              <AppText variant="label">{detail.total > 0 ? Math.round(detail.correct / detail.total * 100) + '%' : '—'} accuracy</AppText>
+              <AppText variant="label">{formatTime(detail.elapsedMs)} elapsed</AppText>
             </View>
           </View>
           <View style={styles.attempts}>
-            <SectionTitle title="Answers" />
+            <AppText variant="heading" accessibilityRole="header">Answers</AppText>
             {detail.attempts.map((attempt, index) => <AttemptRow key={index} attempt={attempt} timing />)}
           </View>
         </>
@@ -69,10 +62,10 @@ export function HistoryDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  notice: { gap: spacing.md },
+  screen: { gap: spacing.lg },
+  notice: { gap: spacing.sm },
   summary: { gap: spacing.sm },
-  score: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', gap: spacing.sm },
-  metrics: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xl },
-  metric: { flexGrow: 1, flexBasis: 108, gap: spacing.xs },
-  attempts: { gap: spacing.sm },
+  score: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
+  metrics: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.lg },
+  attempts: { gap: spacing.xs },
 });
