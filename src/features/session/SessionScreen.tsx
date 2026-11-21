@@ -119,7 +119,7 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
         <View style={styles.paused}>
           <CompanionStage expression="sleepy" placement="inline" style={styles.pauseStage}>
             <AppText variant="title" accessibilityRole="header">Paused</AppText>
-            <AppText variant="body" tone="muted">Take your time. Resume whenever you're ready.</AppText>
+            <AppText variant="body" tone="muted">Take your time. Resume whenever you’re ready.</AppText>
             <SessionTimer activeSince={null} elapsedBefore={state.elapsedBefore} />
           </CompanionStage>
         </View>

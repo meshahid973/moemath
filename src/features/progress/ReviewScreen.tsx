@@ -30,7 +30,7 @@ export function ReviewScreen() {
     <Screen full>
       <Header title="Review mistakes" back />
       <View style={styles.intro}>
-        <AppText variant="heading">Keep what you've learned.</AppText>
+        <AppText variant="heading">Keep what you’ve learned.</AppText>
         <AppText variant="body" tone="muted">
           Due questions come first. Reviewing early does not clear a scheduled review.
         </AppText>
