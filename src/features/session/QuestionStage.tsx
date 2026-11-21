@@ -5,15 +5,24 @@ import type { Question } from '@/engine/arithmetic/types';
 import { formatEquation } from '@/engine/arithmetic/format';
 import type { SessionAttempt } from '@/engine/session/session';
 import { useTheme } from '@/theme/provider';
+import { radius, spacing } from '@/theme/tokens';
 import { SessionCompanion } from './SessionCompanion';
 import { AnswerFeedback } from './AnswerFeedback';
-import { radius, spacing } from '@/theme/tokens';
 
+// The expression updates immediately on each question: no entrance animation can
+// delay a new problem or compete with keypad input.
 const Equation = memo(function Equation({ question }: { question: Question }) {
   return (
-    <View>
-      <AppText variant="equation" style={styles.equation} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>{formatEquation(question)}</AppText>
-    </View>
+    <AppText
+      variant="equation"
+      tone="onMath"
+      style={styles.equation}
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      minimumFontScale={0.5}
+    >
+      {formatEquation(question)}
+    </AppText>
   );
 });
 
@@ -24,11 +33,23 @@ export const QuestionStage = memo(function QuestionStage({ question, input, prev
 }) {
   const { colors } = useTheme();
   return (
-    <View style={[styles.panel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+    <View style={styles.stage}>
       <SessionCompanion previous={previous} />
-      <Equation question={question} />
-      <View style={[styles.answer, { backgroundColor: colors.tint, borderBottomColor: colors.primary }]}>
-        <AppText variant="equation" tone="primary" style={styles.answerText} accessibilityLabel={input ? 'Answer ' + input : 'Answer empty'}>{input || '?'}</AppText>
+      <View style={[styles.mathBand, { backgroundColor: colors.math }]}>
+        <Equation question={question} />
+        <View style={[styles.answer, { borderTopColor: colors.onMath + '55' }]}>
+          <AppText
+            variant="answer"
+            tone="onMath"
+            style={styles.answerText}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.6}
+            accessibilityLabel={input ? 'Answer ' + input : 'Answer empty'}
+          >
+            {input || '?'}
+          </AppText>
+        </View>
       </View>
       <AnswerFeedback attempt={previous} />
     </View>
@@ -36,8 +57,16 @@ export const QuestionStage = memo(function QuestionStage({ question, input, prev
 });
 
 const styles = StyleSheet.create({
-  panel: { flexGrow: 1, justifyContent: 'center', gap: spacing.sm, paddingVertical: spacing.md, paddingHorizontal: spacing.lg, borderWidth: 0, borderRadius: radius.panel, overflow: 'hidden' },
+  stage: { flexGrow: 1, justifyContent: 'center', gap: spacing.md },
+  mathBand: {
+    minHeight: 192, flexGrow: 1, borderRadius: radius.control,
+    justifyContent: 'center', gap: spacing.md,
+    paddingHorizontal: spacing.lg, paddingVertical: spacing.compact,
+  },
   equation: { textAlign: 'center', fontVariant: ['tabular-nums'] },
-  answer: { minHeight: 64, marginHorizontal: spacing.lg, borderRadius: radius.control, borderBottomWidth: 2, justifyContent: 'center', padding: spacing.sm },
-  answerText: { fontSize: 38, textAlign: 'center', fontVariant: ['tabular-nums'] },
+  answer: {
+    minHeight: 70, justifyContent: 'center', paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  answerText: { textAlign: 'center', fontVariant: ['tabular-nums'] },
 });

@@ -23,11 +23,13 @@ export const Keypad = memo(function Keypad({ onKey, canSubmit }: Props) {
     <View style={styles.grid}>
       {rows.map((row, index) => (
         <View key={index} style={styles.row}>
-          {row.map((key) => {
+          {row.map(key => {
             const submit = key === 'submit';
             const disabled = submit && !canSubmit;
             return (
-              <Pressable key={key} testID={'key-' + key}
+              <Pressable
+                key={key}
+                testID={'key-' + key}
                 accessibilityRole="button"
                 accessibilityLabel={key === 'delete' ? 'Delete digit' : submit ? 'Submit answer' : key}
                 accessibilityState={{ disabled }}
@@ -37,17 +39,18 @@ export const Keypad = memo(function Keypad({ onKey, canSubmit }: Props) {
                   styles.key,
                   {
                     minHeight,
-                    backgroundColor: submit ? colors.primary : pressed || key === 'delete' ? colors.tint : colors.surface,
-                    borderColor: submit ? colors.primary : colors.border,
-                    borderBottomColor: submit ? colors.onPrimary + '40' : pressed ? colors.primary : colors.border,
-                    opacity: disabled ? 0.5 : pressed && submit ? 0.8 : 1,
-                    transform: [{ scale: pressed && !reducedMotion ? 0.96 : 1 }],
+                    backgroundColor: disabled ? colors.disabled : submit ? colors.primary : pressed ? colors.pressed : colors.surface,
+                    borderColor: disabled ? colors.disabled : submit ? colors.primary : colors.controlBorder,
+                    borderBottomColor: disabled ? colors.disabled : submit ? colors.primary : pressed ? colors.primary : colors.border,
+                    transform: [{ scale: pressed && !reducedMotion ? 0.985 : 1 }],
                   },
                 ]}
               >
-                {key === 'delete' ? <Delete size={24} color={colors.text} strokeWidth={1.75} /> :
-                  submit ? <Check size={27} color={colors.onPrimary} strokeWidth={2} /> :
-                    <AppText variant="heading" style={styles.digit}>{key}</AppText>}
+                {key === 'delete'
+                  ? <Delete size={24} color={colors.muted} strokeWidth={1.75} />
+                  : submit
+                    ? <Check size={27} color={disabled ? colors.onDisabled : colors.onPrimary} strokeWidth={2} />
+                    : <AppText variant="heading" style={styles.digit}>{key}</AppText>}
               </Pressable>
             );
           })}
@@ -60,6 +63,10 @@ export const Keypad = memo(function Keypad({ onKey, canSubmit }: Props) {
 const styles = StyleSheet.create({
   grid: { gap: spacing.sm },
   row: { flexDirection: 'row', gap: spacing.sm },
-  key: { flex: 1, borderWidth: 1, borderBottomWidth: 2, borderRadius: radius.control, alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.xs },
+  key: {
+    flex: 1, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderBottomWidth: 2, borderRadius: radius.control,
+    paddingVertical: spacing.xs,
+  },
   digit: { fontSize: 27, fontVariant: ['tabular-nums'] },
 });
