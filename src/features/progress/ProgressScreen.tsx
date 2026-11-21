@@ -9,9 +9,9 @@ import { SectionTitle } from '@/components/ui/SectionTitle';
 import { SegmentedChoice } from '@/components/ui/SegmentedChoice';
 import { SkillLevels } from '@/features/adaptive/SkillLevels';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Surface } from '@/components/ui/Surface';
 import { dailyTotals } from '@/database/history';
 import { aggregate, type DailyTotals, type Period } from '@/engine/progress/metrics';
+import { useTheme } from '@/theme/provider';
 import { spacing } from '@/theme/tokens';
 import { ProgressChart } from './ProgressChart';
 import { useAdaptive } from '@/features/adaptive/AdaptiveProvider';
@@ -21,6 +21,7 @@ const metrics = [{ value: 'activity', label: 'Activity' }, { value: 'accuracy', 
 
 export function ProgressScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const { profile } = useAdaptive();
   const revision = Object.values(profile.skills).reduce((sum, skill) => sum + skill.seen, 0);
   const [period, setPeriod] = useState<Period>(7);
@@ -28,6 +29,7 @@ export function ProgressScreen() {
   const [data, setData] = useState<{ period: Period; revision: number; retry: number; rows: DailyTotals[] } | null>(null);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
+
   useFocusEffect(useCallback(() => {
     let active = true;
     let request = 0;
@@ -46,41 +48,82 @@ export function ProgressScreen() {
     const sub = AppState.addEventListener('change', state => { if (state === 'active') refresh(); });
     return () => { active = false; clearTimeout(timer); sub.remove(); };
   }, [period, retry, revision]));
+
   const rows = data?.period === period && data.revision === revision && data.retry === retry ? data.rows : undefined;
   const totals = rows ? aggregate(rows) : null;
 
   return (
     <Screen>
-      <Header title="Progress" />
+      <View style={styles.intro}>
+        <Header title="Progress" />
+        <AppText variant="body" tone="muted">Your practice, at a glance.</AppText>
+      </View>
       <SegmentedChoice options={periods} value={period} onChange={setPeriod} />
-      <Surface>
-        {error ? <>
-          <AppText tone="muted">Could not load statistics.</AppText>
+      {error ? (
+        <View style={styles.notice}>
+          <AppText tone="muted">Could not load your statistics.</AppText>
           <Button label="Retry" variant="secondary" onPress={() => setRetry(x => x + 1)} />
-        </> : !totals ? <AppText tone="muted">Loading progress...</AppText> : <>
-          <View style={styles.grid}>
-            <Metric label="Answered" value={String(totals.total)} />
-            <Metric label="Accuracy" value={totals.accuracy === null ? 'N/A' : Math.round(totals.accuracy * 100) + '%'} />
-            <Metric label="Avg. response" value={totals.averageMs === null ? 'N/A' : (totals.averageMs / 1000).toFixed(1) + 's'} />
+        </View>
+      ) : !totals ? (
+        <AppText tone="muted">Loading progress...</AppText>
+      ) : (
+        <View style={styles.overview}>
+          <View style={[styles.lead, { borderBottomColor: colors.border }]}>
+            <AppText variant="caption" tone="muted">Questions answered</AppText>
+            <AppText variant="score" tone="primary" style={styles.leadValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
+              {String(totals.total)}
+            </AppText>
+          </View>
+          <View style={styles.metrics}>
+            <Metric label="Accuracy" value={totals.accuracy === null ? '—' : Math.round(totals.accuracy * 100) + '%'} />
+            <Metric label="Avg. response" value={totals.averageMs === null ? '—' : (totals.averageMs / 1000).toFixed(1) + 's'} />
             <Metric label="Sessions" value={String(totals.sessions)} />
           </View>
-          {totals.total > 0 && rows ? <>
-            <SegmentedChoice options={metrics} value={metric} onChange={setMetric} />
-            <ProgressChart key={period + ':' + metric} rows={rows} metric={metric} />
-          </> : <EmptyState title="Every answer adds up." message="Complete a session to start your practice record." action="Start practice" onPress={() => router.push('/practice')} />}
-        </>}
-      </Surface>
-      <SectionTitle title="Your skills" />
-      <SkillLevels />
-      <Button label="Session history" arrow variant="secondary" onPress={() => router.push('/history')} />
-      <Button label="Review mistakes" arrow variant="secondary" onPress={() => router.push('/review')} />
+          {totals.total > 0 && rows ? (
+            <View style={[styles.chart, { borderTopColor: colors.border }]}>
+              <SectionTitle title="Activity details" />
+              <SegmentedChoice options={metrics} value={metric} onChange={setMetric} />
+              <ProgressChart key={period + ':' + metric} rows={rows} metric={metric} />
+            </View>
+          ) : (
+            <EmptyState
+              title="Every answer adds up."
+              message="Complete a session to see your progress here."
+              action="Start practice"
+              onPress={() => router.push('/practice')}
+            />
+          )}
+        </View>
+      )}
+      <View style={styles.skills}>
+        <SectionTitle title="Your skills" />
+        <SkillLevels />
+      </View>
+      <View style={styles.links}>
+        <Button label="Session history" arrow variant="secondary" onPress={() => router.push('/history')} />
+        <Button label="Review mistakes" arrow variant="secondary" onPress={() => router.push('/review')} />
+      </View>
     </Screen>
   );
 }
+
 function Metric({ label, value }: { label: string; value: string }) {
-  return <View style={styles.metric}><AppText variant="display" tone="primary">{value}</AppText><AppText variant="caption" tone="muted">{label}</AppText></View>;
+  return <View style={styles.metric}>
+    <AppText variant="heading" tone="primary" style={styles.metricValue}>{value}</AppText>
+    <AppText variant="caption" tone="muted">{label}</AppText>
+  </View>;
 }
+
 const styles = StyleSheet.create({
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
-  metric: { flexBasis: '40%', flexGrow: 1, gap: 2, paddingVertical: spacing.sm },
+  intro: { gap: spacing.sm },
+  notice: { gap: spacing.lg },
+  overview: { gap: spacing.lg },
+  lead: { paddingBottom: spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, gap: spacing.xs },
+  leadValue: { fontVariant: ['tabular-nums'] },
+  metrics: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
+  metric: { flexGrow: 1, flexBasis: 90, gap: spacing.xs },
+  metricValue: { fontVariant: ['tabular-nums'] },
+  chart: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: spacing.lg, gap: spacing.md },
+  skills: { gap: spacing.sm },
+  links: { gap: spacing.sm },
 });

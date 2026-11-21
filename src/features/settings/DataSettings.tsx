@@ -11,29 +11,29 @@ import { spacing } from '@/theme/tokens';
 export function DataSettings() {
   const { reset, pending, error } = useAdaptive();
   const { error: preferenceError } = usePreferences();
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<'export' | 'reset' | null>(null);
 
   const exportData = async () => {
-    setBusy(true);
+    setBusy('export');
     try { await exportPracticeData(); }
     catch { Alert.alert('Export failed', 'Could not export your local data. Try again.'); }
-    finally { setBusy(false); }
+    finally { setBusy(null); }
   };
 
   const resetData = async () => {
-    setBusy(true);
+    setBusy('reset');
     try {
       await reset();
       try { clearExportCache(); } catch { /* cache cleanup is best effort */ }
       Alert.alert('Progress reset', 'Your settings have been kept.');
     } catch { Alert.alert('Reset failed', 'Could not reset progress. Retry after saving pending sessions.'); }
-    finally { setBusy(false); }
+    finally { setBusy(null); }
   };
 
   return <View style={styles.group}>
     <SectionTitle title="Local data" />
-    <Button label={busy ? 'Working...' : 'Export data'} variant="secondary" disabled={busy || pending || error || preferenceError} onPress={() => { void exportData(); }} />
-    <Button label="Reset practice data" variant="secondary" disabled={busy || pending} onPress={() => Alert.alert('Reset practice data?', 'This permanently deletes saved history, skill levels and mistake reviews. Your appearance and sound settings will stay.', [
+    <Button label="Export data" variant="secondary" loading={busy === 'export'} disabled={busy !== null || pending || error || preferenceError} onPress={() => { void exportData(); }} />
+    <Button label="Reset practice data" variant="secondary" loading={busy === 'reset'} disabled={busy !== null || pending} onPress={() => Alert.alert('Reset practice data?', 'This permanently deletes saved history, skill levels and mistake reviews. Your appearance and sound settings will stay.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Reset', style: 'destructive', onPress: () => { void resetData(); } },
     ])} />

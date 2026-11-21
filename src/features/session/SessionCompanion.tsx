@@ -10,7 +10,8 @@ import { spacing } from '@/theme/tokens';
 export const SessionCompanion = memo(function SessionCompanion({ previous }: { previous?: SessionAttempt }) {
   const { showCompanion } = useCompanionSettings();
   const { height, width, fontScale } = useWindowDimensions();
-  const visible = showCompanion && height >= 680 && width >= 350 && fontScale <= 1.2;
+  // Keep the keypad and equation fully visible on shorter phones.
+  const visible = showCompanion && height >= 820 && width >= 350 && fontScale <= 1.2;
   const [settled, setSettled] = useState<SessionAttempt>();
 
   useEffect(() => {

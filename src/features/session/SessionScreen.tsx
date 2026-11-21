@@ -17,8 +17,7 @@ import { Keypad, type Key } from './Keypad';
 import { QuestionStage } from './QuestionStage';
 import { SessionProgress } from './SessionProgress';
 import { SessionResults } from './SessionResults';
-import { CompanionPortrait, hasCompanion } from '@/features/companion/CompanionPortrait';
-import { CompanionDialogue } from '@/features/companion/CompanionDialogue';
+import { CompanionStage } from '@/features/companion/CompanionStage';
 import { useCompanionSettings } from '@/features/companion/CompanionSettings';
 import { AnswerSounds } from './AnswerSounds';
 import { useAnswerHaptics } from './useAnswerHaptics';
@@ -37,7 +36,7 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
   const index = state.attempts.length;
   const question = state.questions[index];
   const total = state.questions.length;
-  const { showCompanion, soundEffects } = useCompanionSettings();
+  const { soundEffects } = useCompanionSettings();
   const previous = state.attempts[index - 1];
   useAnswerHaptics(previous);
 
@@ -118,10 +117,11 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
         </View>
         <SessionProgress total={total} completed={index} />
         <View style={styles.paused}>
-          {showCompanion && hasCompanion && <CompanionPortrait expression="sleepy" size={108} />}
-          <AppText variant="title">Paused</AppText>
-          {showCompanion && <CompanionDialogue message="Take your time." />}
-          <SessionTimer activeSince={null} elapsedBefore={state.elapsedBefore} />
+          <CompanionStage expression="sleepy" placement="inline" style={styles.pauseStage}>
+            <AppText variant="title" accessibilityRole="header">Paused</AppText>
+            <AppText variant="body" tone="muted">Take your time. Resume whenever you're ready.</AppText>
+            <SessionTimer activeSince={null} elapsedBefore={state.elapsedBefore} />
+          </CompanionStage>
         </View>
         <Button label="Resume" onPress={resume} />
         <Button label="Restart" variant="secondary" onPress={() => Alert.alert('Restart practice?', 'Your current answers will be discarded.', [
@@ -157,5 +157,6 @@ const styles = StyleSheet.create({
   headerSpacer: { width: 48 },
   counter: { fontVariant: ['tabular-nums'] },
   clock: { alignItems: 'center' },
-  paused: { flexGrow: 1, minHeight: 180, justifyContent: 'center', alignItems: 'center', gap: spacing.md },
+  paused: { flexGrow: 1, minHeight: 180, justifyContent: 'center', gap: spacing.md },
+  pauseStage: { width: '100%' },
 });
