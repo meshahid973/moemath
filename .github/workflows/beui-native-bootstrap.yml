@@ -29,6 +29,8 @@ jobs:
         run: npx --yes beui-native add radio
       - name: Install native keypad from beUI CLI
         run: npx --yes beui-native add keypad
+      - name: Install SDK-compatible gesture root dependency
+        run: npx expo install react-native-gesture-handler
       - name: Commit upstream beUI sources and package metadata
         run: |
           git config user.name "github-actions[bot]"
