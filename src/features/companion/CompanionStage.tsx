@@ -12,9 +12,8 @@ type Props = PropsWithChildren<{
   style?: StyleProp<ViewStyle>;
 }>;
 
-// Reserve a character margin only when the copy has enough width to remain legible.
-// Below that width, place the small portrait above full-width text rather than
-// shrinking typography. A hidden companion never reserves an empty margin.
+// The companion occupies a deliberate right-hand margin. On very narrow
+// layouts or large text, the content comes first and the small portrait follows.
 export function CompanionStage({ expression, placement = 'margin', children, style }: Props) {
   const { colors } = useTheme();
   const { width, fontScale } = useWindowDimensions();
@@ -23,33 +22,38 @@ export function CompanionStage({ expression, placement = 'margin', children, sty
   const visible = showCompanion && hasCompanion;
   const predictedWidth = Math.min(size.content, Math.max(0, width - (width < layout.compact ? spacing.compact : spacing.screen) * 2));
   const contentWidth = available > 0 ? available : predictedWidth;
-  const columnWidth = placement === 'margin' ? layout.characterMargin : layout.inlinePortrait;
-  const minTextWidth = placement === 'margin' ? 210 : 190;
-  const reflow = visible && (fontScale >= layout.largeText || contentWidth < columnWidth + spacing.lg + minTextWidth);
+  const reflow = visible && (fontScale >= layout.largeText || contentWidth < (placement === 'margin' ? 292 : 260));
   const margin = visible && placement === 'margin' && !reflow;
-  const portraitSize = margin ? layout.characterPortrait : layout.inlinePortrait;
+  const frameWidth = margin ? Math.min(132, contentWidth * 0.36) : layout.inlinePortrait;
+  const portraitSize = margin ? 160 : layout.inlinePortrait;
 
   return (
-    <View onLayout={event => setAvailable(event.nativeEvent.layout.width)}
-      style={[styles.stage, reflow && styles.reflow, style]}>
+    <View
+      onLayout={event => {
+        const next = event.nativeEvent.layout.width;
+        setAvailable(previous => previous === next ? previous : next);
+      }}
+      style={[styles.stage, reflow && styles.reflow, style]}
+    >
+      <View style={[styles.content, reflow && styles.fullWidth]}>{children}</View>
       {visible && (
-        <View pointerEvents="none" style={[
-          styles.portrait, { backgroundColor: colors.character },
-          margin ? { width: layout.characterMargin, alignSelf: 'stretch' } : styles.inline,
-        ]}>
+        <View pointerEvents="none" style={[styles.portrait, { width: frameWidth, height: portraitSize }]}>
+          <View style={[styles.portraitHalo, {
+            width: frameWidth, height: frameWidth, borderRadius: frameWidth / 2,
+            backgroundColor: colors.character,
+          }]} />
           <CompanionPortrait expression={expression} size={portraitSize} />
         </View>
       )}
-      <View style={[styles.content, reflow && styles.fullWidth]}>{children}</View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  stage: { flexDirection: 'row', gap: spacing.lg, alignItems: 'center' },
+  stage: { flexDirection: 'row', gap: spacing.md, alignItems: 'center' },
   reflow: { flexDirection: 'column', alignItems: 'stretch' },
-  portrait: { overflow: 'hidden', alignItems: 'center', justifyContent: 'flex-start' },
-  inline: { width: layout.inlinePortrait, height: layout.inlinePortrait, alignSelf: 'flex-start' },
+  portrait: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  portraitHalo: { position: 'absolute', bottom: 0 },
   content: { flex: 1, minWidth: 0, gap: spacing.sm },
   fullWidth: { flex: 0, width: '100%' },
 });
