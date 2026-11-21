@@ -17,8 +17,7 @@ import { Keypad, type Key } from './Keypad';
 import { QuestionStage } from './QuestionStage';
 import { SessionProgress } from './SessionProgress';
 import { SessionResults } from './SessionResults';
-import { CompanionPortrait, hasCompanion } from '@/features/companion/CompanionPortrait';
-import { CompanionDialogue } from '@/features/companion/CompanionDialogue';
+import { CompanionStage } from '@/features/companion/CompanionStage';
 import { useCompanionSettings } from '@/features/companion/CompanionSettings';
 import { AnswerSounds } from './AnswerSounds';
 import { useAnswerHaptics } from './useAnswerHaptics';
@@ -27,17 +26,23 @@ import { SessionTimer } from './SessionTimer';
 export function SessionScreen({ options }: { options: SessionOptions }) {
   const router = useRouter();
   const { profile, record, ready, error, pending } = useAdaptive();
-  const [state, dispatch] = useReducer(sessionReducer, options, initial => createSession({ ...initial, planned: initial.planned ?? (initial.adaptive && ready && !error ? adaptiveQuestions(profile, initial.operation, initial.seed ?? 0, Number(initial.id?.split(':')[0]) || 0) : undefined) }));
+  const [state, dispatch] = useReducer(sessionReducer, options, initial => createSession({
+    ...initial,
+    planned: initial.planned ?? (initial.adaptive && ready && !error
+      ? adaptiveQuestions(profile, initial.operation, initial.seed ?? 0, Number(initial.id?.split(':')[0]) || 0)
+      : undefined),
+  }));
   const recorded = useRef<readonly unknown[] | undefined>(undefined);
   useEffect(() => {
     if (state.phase !== 'completed' || recorded.current === state.attempts) return;
     recorded.current = state.attempts;
     record(state.id ?? (Date.now() + ':' + createSeed()), state.attempts, state.completedAt ?? Date.now(), state.completedDay);
   }, [state.phase, state.attempts, state.id, state.completedAt, state.completedDay, record]);
+
   const index = state.attempts.length;
   const question = state.questions[index];
   const total = state.questions.length;
-  const { showCompanion, soundEffects } = useCompanionSettings();
+  const { soundEffects } = useCompanionSettings();
   const previous = state.attempts[index - 1];
   useAnswerHaptics(previous);
 
@@ -45,13 +50,15 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
     if (router.canGoBack()) router.back();
     else router.replace('/');
   }, [router]);
-
   const pause = useCallback(() => dispatch({ type: 'pause', now: performance.now() }), []);
   const resume = useCallback(() => dispatch({ type: 'resume', now: performance.now() }), []);
   const retry = useCallback(() => {
     const seed = createSeed();
     const now = Date.now();
-    dispatch({ type: 'restart', options: { ...options, seed, id: now + ':' + seed, planned: options.planned ?? (options.adaptive && ready && !error ? adaptiveQuestions(profile, options.operation, seed, now) : undefined) }, now: performance.now() });
+    dispatch({ type: 'restart', options: {
+      ...options, seed, id: now + ':' + seed,
+      planned: options.planned ?? (options.adaptive && ready && !error ? adaptiveQuestions(profile, options.operation, seed, now) : undefined),
+    }, now: performance.now() });
   }, [options, profile, ready, error]);
 
   const confirmExit = useCallback(() => {
@@ -63,7 +70,7 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
   }, [leave, pause]);
 
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (next) => {
+    const subscription = AppState.addEventListener('change', next => {
       if (next !== 'active') pause();
     });
     const blur = Platform.OS === 'android' ? AppState.addEventListener('blur', pause) : undefined;
@@ -72,21 +79,15 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
     } else {
       pause();
     }
-    return () => {
-      subscription.remove();
-      blur?.remove();
-    };
+    return () => { subscription.remove(); blur?.remove(); };
   }, [pause]);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       if (state.phase === 'completed') {
         if (!pending) leave();
-      } else if (state.phase === 'paused') {
-        confirmExit();
-      } else {
-        pause();
-      }
+      } else if (state.phase === 'paused') confirmExit();
+      else pause();
       return true;
     });
     return () => subscription.remove();
@@ -97,65 +98,64 @@ export function SessionScreen({ options }: { options: SessionOptions }) {
     if (key === 'submit') {
       const wallTime = Date.now();
       dispatch({ type: 'submit', index, generation, now: performance.now(), wallTime, day: localDay(wallTime) });
-    }
-    else if (key === 'delete') dispatch({ type: 'backspace', index, generation });
+    } else if (key === 'delete') dispatch({ type: 'backspace', index, generation });
     else dispatch({ type: 'digit', digit: key, index, generation });
   }, [index, generation]);
 
   const audio = soundEffects && <AnswerSounds attempt={previous} paused={state.phase === 'paused'} />;
 
   if (state.phase === 'completed') {
-    return <>{audio}<Screen full><SessionResults attempts={state.attempts} onRetry={retry} onDone={leave} saving={pending} /></Screen></>;
+    return <>{audio}<Screen full contentStyle={styles.results}>
+      <SessionResults attempts={state.attempts} onRetry={retry} onDone={leave} saving={pending} />
+    </Screen></>;
   }
 
   if (state.phase === 'paused') {
-    return (
-      <>{audio}<Screen full fill compact>
-        <View style={styles.header}>
-          <IconButton icon={X} label="End practice" onPress={confirmExit} />
-          <AppText variant="label">{index + 1} / {total}</AppText>
-          <View style={styles.headerSpacer} />
-        </View>
-        <SessionProgress total={total} completed={index} />
-        <View style={styles.paused}>
-          {showCompanion && hasCompanion && <CompanionPortrait expression="sleepy" size={108} />}
-          <AppText variant="title">Paused</AppText>
-          {showCompanion && <CompanionDialogue message="Take your time." />}
+    return <>{audio}<Screen full fill compact footer={<Button label="Resume" onPress={resume} />}>
+      <View style={styles.header}>
+        <IconButton icon={X} label="End practice" onPress={confirmExit} />
+        <AppText variant="metadata" tone="muted">{index + 1} / {total}</AppText>
+        <View style={styles.spacer} />
+      </View>
+      <SessionProgress total={total} completed={index} />
+      <View style={styles.paused}>
+        <CompanionStage expression="sleepy">
+          <AppText variant="hero" accessibilityRole="header">A short break?</AppText>
+          <AppText variant="body" tone="muted">Your timer is paused.</AppText>
           <SessionTimer activeSince={null} elapsedBefore={state.elapsedBefore} />
-        </View>
-        <Button label="Resume" onPress={resume} />
-        <Button label="Restart" variant="secondary" onPress={() => Alert.alert('Restart practice?', 'Your current answers will be discarded.', [
+        </CompanionStage>
+      </View>
+      <Button label="Restart session" variant="secondary" onPress={() => Alert.alert(
+        'Restart practice?', 'Your current answers will be discarded.', [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Restart', onPress: retry },
-        ])} />
-        <Button label="End practice" variant="secondary" onPress={confirmExit} />
-      </Screen></>
-    );
+        ],
+      )} />
+    </Screen></>;
   }
 
   if (!question) return null;
-
-  return (
-    <>{audio}<Screen full fill compact>
-      <View style={styles.header}>
-        <IconButton icon={X} label="End practice" onPress={confirmExit} />
-        <AppText variant="label" style={styles.counter}>{index + 1} / {total}</AppText>
-        <IconButton icon={Pause} label="Pause" onPress={pause} />
-      </View>
-      <SessionProgress total={total} completed={index} />
-      <View style={styles.clock}>
-        <SessionTimer activeSince={state.activeSince} elapsedBefore={state.elapsedBefore} />
-      </View>
-      <QuestionStage question={question} input={state.input} previous={previous} />
-      <Keypad onKey={onKey} canSubmit={state.phase === 'active' && state.input.length > 0} />
-    </Screen></>
-  );
+  return <>{audio}<Screen full fill compact footer={
+    <Keypad onKey={onKey} canSubmit={state.phase === 'active' && state.input.length > 0} />
+  }>
+    <View style={styles.header}>
+      <IconButton icon={X} label="End practice" onPress={confirmExit} />
+      <AppText variant="metadata" style={styles.counter}>{index + 1} / {total}</AppText>
+      <IconButton icon={Pause} label="Pause" onPress={pause} />
+    </View>
+    <SessionProgress total={total} completed={index} />
+    <View style={styles.clock}>
+      <SessionTimer activeSince={state.activeSince} elapsedBefore={state.elapsedBefore} />
+    </View>
+    <QuestionStage question={question} input={state.input} previous={previous} />
+  </Screen></>;
 }
 
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-  headerSpacer: { width: 48 },
+  spacer: { width: 48 },
   counter: { fontVariant: ['tabular-nums'] },
   clock: { alignItems: 'center' },
-  paused: { flexGrow: 1, minHeight: 180, justifyContent: 'center', alignItems: 'center', gap: spacing.md },
+  paused: { flexGrow: 1, minHeight: 200, justifyContent: 'center', gap: spacing.md },
+  results: { gap: spacing.lg },
 });

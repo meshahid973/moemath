@@ -1,20 +1,34 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from './AppText';
 import { Button } from './Button';
-import { useTheme } from '@/theme/provider';
+import { CompanionPortrait, hasCompanion } from '@/features/companion/CompanionPortrait';
+import { useCompanionSettings } from '@/features/companion/CompanionSettings';
 import { spacing } from '@/theme/tokens';
-import { CompanionStage } from '@/features/companion/CompanionStage';
 
-export function EmptyState({ title, message, action, onPress }: { title: string; message: string; action?: string; onPress?: () => void }) {
-  const { colors } = useTheme();
-  return <View style={[styles.state, { borderColor: colors.border }]}>
-    <CompanionStage expression="encouraging" placement="inline">
-      <View style={styles.copy}><AppText variant="heading">{title}</AppText><AppText tone="muted" variant="caption">{message}</AppText></View>
-    </CompanionStage>
-    {action && onPress && <Button label={action} onPress={onPress} arrow />}
-  </View>;
+export function EmptyState({ title, message, action, onPress }: {
+  title: string; message: string; action?: string; onPress?: () => void;
+}) {
+  const { showCompanion } = useCompanionSettings();
+  return (
+    <View style={styles.state}>
+      <View style={styles.row}>
+        <View style={styles.copy}>
+          <AppText variant="heading" accessibilityRole="header">{title}</AppText>
+          <AppText variant="body" tone="muted">{message}</AppText>
+        </View>
+        {showCompanion && hasCompanion && (
+          <View pointerEvents="none">
+            <CompanionPortrait expression="encouraging" size={94} />
+          </View>
+        )}
+      </View>
+      {action && onPress && <Button label={action} variant="secondary" arrow onPress={onPress} />}
+    </View>
+  );
 }
+
 const styles = StyleSheet.create({
-  state: { paddingVertical: spacing.xl, borderTopWidth: StyleSheet.hairlineWidth, gap: spacing.lg },
-  copy: { flex: 1, gap: spacing.sm },
+  state: { paddingVertical: spacing.lg, gap: spacing.sm },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  copy: { flex: 1, minWidth: 0, gap: spacing.sm },
 });

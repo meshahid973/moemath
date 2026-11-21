@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@import "uniwind";
+@import "./src/styles/theme.css";
+
+@theme {
+  --font-sans: "MPlus1p_400Regular";
+  --font-sans-medium: "MPlus1p_700Bold";
+  --font-sans-semibold: "MPlus1p_700Bold";
+  --font-sans-bold: "MPlus1p_700Bold";
+}

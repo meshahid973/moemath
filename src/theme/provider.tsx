@@ -1,6 +1,7 @@
-import { createContext, useCallback, useContext, useMemo, type PropsWithChildren } from 'react';
+import { createContext, useCallback, useContext, useLayoutEffect, useMemo, type PropsWithChildren } from 'react';
 import { useStoredAppearance } from '@/features/settings/PreferencesProvider';
 import { useColorScheme } from 'react-native';
+import { Uniwind } from 'uniwind';
 import { palettes, resolveTheme, type Palette, type ThemeMode } from './tokens';
 
 type Appearance = { mode: ThemeMode; setMode: (mode: ThemeMode) => void };
@@ -19,6 +20,12 @@ export function ThemeProvider({ children, fontsReady = true }: PropsWithChildren
   const appearance = useMemo(() => ({ mode, setMode }), [mode, setMode]);
   const base = themes[resolveTheme(mode, system)];
   const theme = useMemo(() => ({ ...base, fontsReady }), [base, fontsReady]);
+  // The stored preference remains the single source of truth. beUI's Uniwind
+  // tokens must follow it, including when the device appearance changes.
+  useLayoutEffect(() => {
+    Uniwind.setTheme(mode);
+  }, [mode]);
+
   return (
     <AppearanceContext.Provider value={appearance}>
       <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>

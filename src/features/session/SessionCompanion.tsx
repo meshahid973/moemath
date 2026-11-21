@@ -1,16 +1,16 @@
 import { memo, useEffect, useState } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { CompanionPortrait } from '@/features/companion/CompanionPortrait';
-import { CompanionDialogue } from '@/features/companion/CompanionDialogue';
 import { useCompanionSettings } from '@/features/companion/CompanionSettings';
 import { answerExpression } from '@/features/companion/expressions';
 import type { SessionAttempt } from '@/engine/session/session';
+import { AppText } from '@/components/ui/AppText';
 import { spacing } from '@/theme/tokens';
 
 export const SessionCompanion = memo(function SessionCompanion({ previous }: { previous?: SessionAttempt }) {
   const { showCompanion } = useCompanionSettings();
   const { height, width, fontScale } = useWindowDimensions();
-  const visible = showCompanion && height >= 680 && width >= 350 && fontScale <= 1.2;
+  const visible = showCompanion && height >= 760 && width >= 340 && fontScale <= 1.25;
   const [settled, setSettled] = useState<SessionAttempt>();
 
   useEffect(() => {
@@ -23,17 +23,16 @@ export const SessionCompanion = memo(function SessionCompanion({ previous }: { p
   const reacting = previous && previous !== settled;
   const correct = previous?.expected === previous?.submitted;
   const expression = reacting ? answerExpression(correct) : 'thinking';
-  const message = reacting ? correct ? 'Nice work!' : 'Keep going!' : previous ? 'You can do it.' : 'Ready when you are!';
+  const message = reacting ? (correct ? 'Nice work!' : 'Keep going!') : 'You’ve got this.';
 
   return (
     <View style={styles.row}>
-      <CompanionPortrait expression={expression} size={64} />
-      <View style={styles.dialogue}><CompanionDialogue message={message} /></View>
+      <CompanionPortrait expression={expression} size={44} />
+      <AppText variant="caption" tone="muted">{message}</AppText>
     </View>
   );
 });
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm, height: 64 },
-  dialogue: { flexShrink: 1, width: 156 },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, height: 44 },
 });

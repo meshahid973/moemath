@@ -5,15 +5,23 @@ import type { Question } from '@/engine/arithmetic/types';
 import { formatEquation } from '@/engine/arithmetic/format';
 import type { SessionAttempt } from '@/engine/session/session';
 import { useTheme } from '@/theme/provider';
+import { spacing } from '@/theme/tokens';
 import { SessionCompanion } from './SessionCompanion';
 import { AnswerFeedback } from './AnswerFeedback';
-import { radius, spacing } from '@/theme/tokens';
 
+// Keep math immediate. Neither the equation nor the typed answer animates.
 const Equation = memo(function Equation({ question }: { question: Question }) {
   return (
-    <View>
-      <AppText variant="equation" style={styles.equation} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>{formatEquation(question)}</AppText>
-    </View>
+    <AppText
+      variant="equation"
+      style={styles.equation}
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      minimumFontScale={0.55}
+      accessibilityRole="text"
+    >
+      {formatEquation(question)}
+    </AppText>
   );
 });
 
@@ -24,11 +32,24 @@ export const QuestionStage = memo(function QuestionStage({ question, input, prev
 }) {
   const { colors } = useTheme();
   return (
-    <View style={[styles.panel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+    <View style={styles.stage}>
       <SessionCompanion previous={previous} />
-      <Equation question={question} />
-      <View style={[styles.answer, { backgroundColor: colors.tint, borderBottomColor: colors.primary }]}>
-        <AppText variant="equation" tone="primary" style={styles.answerText} accessibilityLabel={input ? 'Answer ' + input : 'Answer empty'}>{input || '?'}</AppText>
+      <View style={styles.work}>
+        <Equation question={question} />
+        <View style={[styles.answer, { borderBottomColor: colors.primary }]}>
+          <AppText
+            variant="answer"
+            tone={input ? 'primary' : 'muted'}
+            style={styles.answerText}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.55}
+            accessibilityLabel={input ? 'Answer ' + input : 'Answer empty'}
+            accessibilityLiveRegion="polite"
+          >
+            {input || '?'}
+          </AppText>
+        </View>
       </View>
       <AnswerFeedback attempt={previous} />
     </View>
@@ -36,8 +57,10 @@ export const QuestionStage = memo(function QuestionStage({ question, input, prev
 });
 
 const styles = StyleSheet.create({
-  panel: { flexGrow: 1, justifyContent: 'center', gap: spacing.sm, paddingVertical: spacing.md, paddingHorizontal: spacing.lg, borderWidth: 0, borderRadius: radius.panel, overflow: 'hidden' },
-  equation: { textAlign: 'center', fontVariant: ['tabular-nums'] },
-  answer: { minHeight: 64, marginHorizontal: spacing.lg, borderRadius: radius.control, borderBottomWidth: 2, justifyContent: 'center', padding: spacing.sm },
-  answerText: { fontSize: 38, textAlign: 'center', fontVariant: ['tabular-nums'] },
+  stage: { flexGrow: 1, minHeight: 208, justifyContent: 'space-around', gap: spacing.sm },
+  work: { flexGrow: 1, justifyContent: 'center', gap: spacing.xl },
+  equation: { fontSize: 52, lineHeight: 72, textAlign: 'center', fontVariant: ['tabular-nums'] },
+  answer: { alignSelf: 'center', width: '62%', minWidth: 136, maxWidth: 260,
+    minHeight: 60, borderBottomWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  answerText: { textAlign: 'center', fontVariant: ['tabular-nums'] },
 });

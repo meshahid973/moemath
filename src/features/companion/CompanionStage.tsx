@@ -1,7 +1,6 @@
 import { useState, type PropsWithChildren } from 'react';
 import { StyleSheet, View, useWindowDimensions, type StyleProp, type ViewStyle } from 'react-native';
-import { useTheme } from '@/theme/provider';
-import { layout, spacing } from '@/theme/tokens';
+import { layout, size, spacing } from '@/theme/tokens';
 import { CompanionPortrait, hasCompanion } from './CompanionPortrait';
 import { useCompanionSettings } from './CompanionSettings';
 import type { Expression } from './expressions';
@@ -12,34 +11,38 @@ type Props = PropsWithChildren<{
   style?: StyleProp<ViewStyle>;
 }>;
 
-// The portrait and content occupy separate layout regions: controls can never
-// overlap her face. At larger type/smaller widths, content takes the full row.
+// Character art belongs to the canvas, not to a rounded avatar or feature card.
 export function CompanionStage({ expression, placement = 'margin', children, style }: Props) {
-  const { colors } = useTheme();
   const { width, fontScale } = useWindowDimensions();
   const { showCompanion } = useCompanionSettings();
   const [available, setAvailable] = useState(0);
-  const reflow = width < layout.compact || fontScale >= layout.largeText || (available > 0 && available < layout.characterMinWidth);
-  const margin = placement === 'margin' && !reflow;
   const visible = showCompanion && hasCompanion;
-  const portraitSize = margin ? layout.characterPortrait : layout.inlinePortrait;
+  const predicted = Math.min(size.content, width - (width < layout.compact ? spacing.compact : spacing.screen) * 2);
+  const contentWidth = available > 0 ? available : predicted;
+  const portraitSize = placement === 'margin' ? 178 : 100;
+  const stacked = visible && (fontScale >= layout.largeText || contentWidth < (placement === 'margin' ? 355 : 280));
 
-  return <View onLayout={event => setAvailable(event.nativeEvent.layout.width)} style={[styles.stage, reflow && styles.reflow, style]}>
-    {visible && <View pointerEvents="none" style={[
-      styles.portrait, { backgroundColor: colors.character },
-      margin ? { width: layout.characterMargin, alignSelf: 'stretch' } : styles.inline,
-    ]}>
-      <CompanionPortrait expression={expression} size={portraitSize} />
-    </View>}
-    <View style={[styles.content, reflow && styles.fullWidth]}>{children}</View>
-  </View>;
+  return (
+    <View
+      onLayout={event => {
+        const next = event.nativeEvent.layout.width;
+        setAvailable(current => current === next ? current : next);
+      }}
+      style={[styles.stage, stacked && styles.stacked, style]}
+    >
+      <View style={[styles.content, stacked && styles.full]}>{children}</View>
+      {visible && (
+        <View pointerEvents="none" style={[styles.portrait, { width: portraitSize, height: portraitSize }]}>
+          <CompanionPortrait expression={expression} size={portraitSize} />
+        </View>
+      )}
+    </View>
+  );
 }
-
 const styles = StyleSheet.create({
-  stage: { flexDirection: 'row', gap: spacing.lg, alignItems: 'center' },
-  reflow: { flexDirection: 'column', alignItems: 'stretch' },
-  portrait: { overflow: 'hidden', alignItems: 'center', justifyContent: 'flex-start' },
-  inline: { width: layout.inlinePortrait, height: layout.inlinePortrait, alignSelf: 'flex-start' },
+  stage: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  stacked: { flexDirection: 'column', alignItems: 'flex-start' },
   content: { flex: 1, minWidth: 0, gap: spacing.sm },
-  fullWidth: { flex: 0, width: '100%' },
+  full: { flex: 0, width: '100%' },
+  portrait: { alignSelf: 'flex-end', alignItems: 'center', justifyContent: 'flex-end', overflow: 'hidden' },
 });
