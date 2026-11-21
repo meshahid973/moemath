@@ -1,0 +1,40 @@
+# Temporary, branch-scoped bootstrap. Remove once the components are committed.
+name: Install beUI Native sources
+on:
+  push:
+    branches:
+      - codex/plus-studio-study-loop
+    paths:
+      - .github/workflows/beui-native-bootstrap.yml
+permissions:
+  contents: write
+jobs:
+  install:
+    if: github.repository == 'meshahid973/moemath'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - name: Install native button from beUI CLI
+        run: npx --yes beui-native add button
+      - name: Install native tabs from beUI CLI
+        run: npx --yes beui-native add tabs
+      - name: Install native radio from beUI CLI
+        run: npx --yes beui-native add radio
+      - name: Install native keypad from beUI CLI
+        run: npx --yes beui-native add keypad
+      - name: Commit upstream beUI sources and package metadata
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Install beUI Native components from official CLI"
+            git push origin HEAD:codex/plus-studio-study-loop
+          fi
